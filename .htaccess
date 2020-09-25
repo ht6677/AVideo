@@ -53,11 +53,14 @@ Options All -Indexes
 # END Caching
 <IfModule mod_rewrite.c>
     RewriteEngine on
-    
     #VideoHLS for DRM
     RewriteRule    ^videos/([^/]+)/(.*).key$ plugin/VideoHLS/downloadProtection.php?filename=$1&key=$2    [QSA]
 
     RewriteRule    glyphicons-halflings-regular(.+)$ view/bootstrap/fonts/glyphicons-halflings-regular$1    [NC,L]
+    
+    RewriteRule    ^meet/([0-9]+)/(.+)$ plugin/Meet/iframe.php?meet_schedule_id=$1&roomName=$2 [NC,L,QSA]
+    RewriteRule    ^meet/([0-9]+)$ plugin/Meet/iframe.php?meet_schedule_id=$1 [NC,L,QSA]
+    RewriteRule    ^live/([0-9]+)/(.+)$ plugin/Live/?live_servers_id=$1&c=$2 [NC,L,QSA]
 
     #main Files
     RewriteRule    ^index.php$ view/index.php    [NC,L]
@@ -117,6 +120,7 @@ Options All -Indexes
     RewriteRule    ^videoEmbed/([^!#$&'()*+,\/:;=?@[\]]+)/?$ view/videoEmbeded.php?videoName=$1    [QSA]
     RewriteRule    ^vEmbed/([0-9]+)/?$ view/videoEmbeded.php?v=$1    [QSA]
     RewriteRule    ^videoEmbed/([0-9]+)/([^!#$&'()*+,\/:;=?@[\]]+)/?$ view/videoEmbeded.php?v=$1    [QSA]
+    RewriteRule    ^evideoEmbed/([a-zA-z0-9=]+)/?$ view/videoEmbeded.php?evideo=$1    [QSA]
 
     RewriteRule    ^plugin/([^!#$&'()*+,\/:;=?@[\]]+)/(.*)?$ plugin/$1/$2    [NC,L]
 
@@ -246,11 +250,9 @@ Options All -Indexes
     RewriteRule    ^videos/(.*)/index.m3u8$ view/hls.php?videoDirectory=$1    [NC,L,QSA]
 
     RewriteRule    ^vast.xml/?([0-9]+)?$ plugin/AD_Server/VAST.php?campaign_has_videos_id=$1    [NC,L]
-    # It must be before image not found
+
     <IfModule mod_xsendfile.c>
-        <FilesMatch "\.(mp4|webm|m3u8|mp3|ogg)$">
-            RewriteRule    ^videos/([^!#$&'()*+,\/:;=?@[\]]+)$ view/xsendfile.php?file=$1    [QSA]
-        </FilesMatch>
+        RewriteRule    ^videos/([^!#$&'()*+,\/:;=?@[\]]+(\.(mp4|webm|m3u8|mp3|ogg)))$ view/xsendfile.php?file=$1    [QSA]
     </IfModule>
 
     # if image do not exists
@@ -290,3 +292,6 @@ Options All -Indexes
   AddOutputFilterByType DEFLATE text/xml
 
 </IfModule>
+php_value post_max_size 4G
+php_value upload_max_filesize 4G
+php_value memory_limit 512M

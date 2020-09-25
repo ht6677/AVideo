@@ -3,21 +3,21 @@
 require_once $global['systemRootPath'] . 'objects/functions.php';
 // filter some security here
 $securityFilter = array('error', 'catName', 'type', 'channelName', 'captcha', 'showOnly', 'key', 'link', 'email', 'country', 'region');
-$securityFilterInt = array('videos_id', 'video_id', 'categories_id', 'user_id', 'users_id', 'comments_id', 'isAdmin', 'priority', 'totalClips');
+$securityFilterInt = array('videos_id', 'video_id', 'categories_id', 'user_id', 'users_id', 'comments_id', 'isAdmin', 'priority', 'totalClips', 'rowCount');
 $securityRemoveSingleQuotes = array('search', 'searchPhrase', 'videoName', 'databaseName', 'sort', 'user', 'pass', 'encodedPass', 'isAdmin', 'videoLink', 'video_password');
 $securityRemoveNonChars = array('resolution', 'format', 'videoDirectory');
 $filterURL = array('videoURL', 'siteURL', 'redirectUri', 'encoderURL');
 
 if (!empty($_GET['base64Url'])) {
     if (!filter_var(base64_decode($_GET['base64Url']), FILTER_VALIDATE_URL)) {
-        _error_log('base64Url attack ' . json_encode($_SERVER), AVideoLog::$WARNING);
+        _error_log('base64Url attack ' . json_encode($_SERVER), AVideoLog::$SECURITY);
         exit;
     }
 }
 
 if (!empty($_POST['base64Url'])) {
     if (!filter_var(base64_decode($_POST['base64Url']), FILTER_VALIDATE_URL)) {
-        _error_log('base64Url attack ' . json_encode($_SERVER), AVideoLog::$WARNING);
+        _error_log('base64Url attack ' . json_encode($_SERVER), AVideoLog::$SECURITY);
         exit;
     }
 }
@@ -25,7 +25,7 @@ if (!empty($_POST['base64Url'])) {
 foreach ($filterURL as $key => $value) {
     if (!empty($_GET[$value])) {
         if (!filter_var($_GET[$value], FILTER_VALIDATE_URL) || !preg_match("/^http.*/i", $_GET[$value])) {
-            _error_log($value.' attack ' . json_encode($_SERVER), AVideoLog::$WARNING);
+            _error_log($value.' attack ' . json_encode($_SERVER), AVideoLog::$SECURITY);
             unset($_GET[$value]);
         }else{
             $_GET[$value] = str_replace(array("'",'"',"<",">"), array("","","",""), $_GET[$value]);
@@ -33,7 +33,7 @@ foreach ($filterURL as $key => $value) {
     }
     if (!empty($_POST[$value])) {
         if (!filter_var($_POST[$value], FILTER_VALIDATE_URL) || !preg_match("/^http.*/i", $_POST[$value])) {
-            _error_log($value.' attack ' . json_encode($_SERVER), AVideoLog::$WARNING);
+            _error_log($value.' attack ' . json_encode($_SERVER), AVideoLog::$SECURITY);
             unset($_POST[$value]);
         }else{
             $_POST[$value] = str_replace(array("'",'"',"<",">"), array("","","",""), $_POST[$value]);
@@ -44,7 +44,7 @@ foreach ($filterURL as $key => $value) {
 
 if (!empty($_FILES)) {
     foreach ($_FILES as $key=>$value) {
-        $_FILES[$key]['name'] = preg_replace('/[^a-z0-9.]/i', '', $_FILES[$key]['name']);
+        $_FILES[$key]['name'] = preg_replace('/[^a-z0-9.,()+& #-]/i', '', cleanString($_FILES[$key]['name']));
     }
 }
 

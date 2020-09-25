@@ -4,6 +4,12 @@ if (User::isLogged() && $user_id == User::getId()) {
     $isMyChannel = true;
 }
 $user = new User($user_id);
+
+if($user->getBdId() != $user_id){
+   header("Location: {$global['webSiteRootURL']}channels");
+   exit;
+}
+
 $_GET['channelName'] = $user->getChannelName();
 $timeLog = __FILE__ . " - channelName: {$_GET['channelName']}";
 TimeLogStart($timeLog);
@@ -16,7 +22,7 @@ if (empty($_GET['current'])) {
 }
 $current = $_POST['current'];
 $rowCount = 25;
-$_POST['rowCount'] = $rowCount;
+$_REQUEST['rowCount'] = $rowCount;
 
 $uploadedVideos = Video::getAllVideos("a", $user_id, !isToHidePrivateVideos());
 $uploadedTotalVideos = Video::getTotalVideos("a", $user_id, !isToHidePrivateVideos());
@@ -52,15 +58,16 @@ TimeLogEnd($timeLog, __LINE__);
     }
     ?>
     <div class="row"><div class="col-6 col-md-12">
-            <h1 class="pull-left">
+            <h2 class="pull-left">
                 <?php
                 echo $user->getNameIdentificationBd();
                 ?>
                 <?php
                 echo User::getEmailVerifiedIcon($user_id)
-                ?></h1>
+                ?></h2>
             <span class="pull-right">
                 <?php
+                echo User::getBlockUserButton($user_id);
                 echo Subscribe::getButton($user_id);
                 ?>
             </span>
@@ -70,13 +77,18 @@ TimeLogEnd($timeLog, __LINE__);
     </div>
 
 
-
+    <?php
+    if(!User::hasBLockedUser($user_id)){
+    ?>
     <div class="tabbable-panel">
         <div class="tabbable-line">
             <ul class="nav nav-tabs">
                 <?php
                 $active = "active";
                 if ($advancedCustomUser->showChannelHomeTab) {
+                    if(!empty($_GET['current'])){ // means you are paging the Videos tab
+                        $active = "";
+                    }
                     ?>
                     <li class="nav-item <?php echo $active; ?>">
                         <a class="nav-link " href="#channelHome" data-toggle="tab" aria-expanded="false">
@@ -87,10 +99,13 @@ TimeLogEnd($timeLog, __LINE__);
                     $active = "";
                 }
                 if ($advancedCustomUser->showChannelVideosTab) {
+                    if(!empty($_GET['current'])){ // means you are paging the Videos tab
+                        $active = "active";
+                    }
                     ?>
                     <li class="nav-item <?php echo $active; ?>">
                         <a class="nav-link " href="#channelVideos" data-toggle="tab" aria-expanded="false">
-                            <?php echo strtoupper(__("Videos")); ?>
+                            <?php echo strtoupper(__("Videos")); ?> <span class="badge"><?php echo $uploadedTotalVideos; ?></span>
                         </a>
                     </li>
                     <?php
@@ -98,7 +113,7 @@ TimeLogEnd($timeLog, __LINE__);
                 }
                 if ($advancedCustomUser->showChannelProgramsTab && !empty($palyListsObj)) {
                     ?>
-                    <li class="nav-item <?php echo $active; ?>">
+                    <li class="nav-item <?php echo $active; ?>" id="channelPlayListsLi">
                         <a class="nav-link " href="#channelPlayLists" data-toggle="tab" aria-expanded="true">
                             <?php echo strtoupper(__("Playlists")); ?>
                         </a>
@@ -112,9 +127,12 @@ TimeLogEnd($timeLog, __LINE__);
                 <?php
                 $active = "active fade in";
                 if ($advancedCustomUser->showChannelHomeTab) {
+                    if(!empty($_GET['current'])){ // means you are paging the Videos tab
+                        $active = "";
+                    }
                     ?>
                     <div class="tab-pane  <?php echo $active; ?>" id="channelHome" style="min-height: 800px;">
-                        <div class="container-fluid modeFlixContainer"> 
+                        <div class="container-fluid modeFlixContainer" style="padding: 15px;"> 
                             <?php
                             $obj = AVideoPlugin::getObjectData("YouPHPFlix2");
                             $obj->BigVideo = true;
@@ -131,6 +149,7 @@ TimeLogEnd($timeLog, __LINE__);
                             $obj->Categories = false;
                             $obj->playVideoOnFullscreen = false;
                             $obj->titleLabel = true;
+                            $obj->RemoveBigVideoDescription = true;
 
                             include $global['systemRootPath'] . 'plugin/YouPHPFlix2/view/modeFlixBody.php';
                             ?>
@@ -140,6 +159,9 @@ TimeLogEnd($timeLog, __LINE__);
                     $active = "fade";
                 }
                 if ($advancedCustomUser->showChannelVideosTab) {
+                    if(!empty($_GET['current'])){ // means you are paging the Videos tab
+                        $active = "active fade in";
+                    }
                     ?>
 
                     <div class="tab-pane <?php echo $active; ?>" id="channelVideos">
@@ -163,7 +185,7 @@ TimeLogEnd($timeLog, __LINE__);
                             </div>
                             <div class="panel-body">
                                 <?php
-                                if (!empty($uploadedVideos[0])) {
+                                if ($advancedCustomUser->showBigVideoOnChannelVideosTab && !empty($uploadedVideos[0])) {
                                     $video = $uploadedVideos[0];
                                     $obj = new stdClass();
                                     $obj->BigVideo = true;
@@ -182,18 +204,9 @@ TimeLogEnd($timeLog, __LINE__);
                             </div>
 
                             <div class="panel-footer">
-                                <ul id="channelPagging"></ul>
-                                <script>
-                                    $(document).ready(function () {
-                                        $('#channelPagging').bootpag({
-                                            total: <?php echo $totalPages; ?>,
-                                            page: <?php echo $current; ?>,
-                                            maxVisible: 10
-                                        }).on('page', function (event, num) {
-                                            document.location = ("<?php echo $global['webSiteRootURL']; ?>channel/<?php echo $_GET['channelName']; ?>?current=" + num);
-                                        });
-                                    });
-                                </script>
+                                <?php 
+                                echo getPagination($totalPages, $current, "{$global['webSiteRootURL']}channel/{$_GET['channelName']}?current={page}");
+                                ?>
                             </div>
                         </div>
                     </div>
@@ -214,7 +227,9 @@ TimeLogEnd($timeLog, __LINE__);
             </div>
         </div>
     </div>
-
+    <?php
+    }
+    ?>
 </div>
 <script src="<?php echo $global['webSiteRootURL']; ?>plugin/Gallery/script.js" type="text/javascript"></script>
 <script src="<?php echo $global['webSiteRootURL']; ?>view/js/infinite-scroll.pkgd.min.js" type="text/javascript"></script>

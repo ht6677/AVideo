@@ -15,9 +15,9 @@
         <thead>
             <tr>
                 <th data-column-id="group_name" data-order="asc"><?php echo __("Name"); ?></th>
-                <th data-column-id="created"><?php echo __("Created"); ?></th>
-                <th data-column-id="modified" ><?php echo __("Modified"); ?></th>
-                <th data-column-id="commands" data-formatter="commands" data-sortable="false"></th>
+                <th data-column-id="created" data-width="150px"  ><?php echo __("Created"); ?></th>
+                <th data-column-id="modified" data-width="150px"  ><?php echo __("Modified"); ?></th>
+                <th data-column-id="commands" data-formatter="commands" data-sortable="false" data-width="100px"  ></th>
             </tr>
         </thead>
     </table>
@@ -60,8 +60,8 @@
             formatters: {
                 "commands": function (column, row)
                 {
-                    var editBtn = '<button type="button" class="btn btn-xs btn-default command-edit" data-row-id="' + row.id + '" data-toggle="tooltip" data-placement="left" title="Edit"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button>'
-                    var deleteBtn = '<button type="button" class="btn btn-default btn-xs command-delete"  data-row-id="' + row.id + '  data-toggle="tooltip" data-placement="left" title="Delete""><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button>';
+                    var editBtn = '<button type="button" class="btn btn-xs btn-default command-edit" data-row-id="' + row.id + '" data-toggle="tooltip" data-placement="left" title="<?php echo __('Edit'); ?>"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button>'
+                    var deleteBtn = '<button type="button" class="btn btn-default btn-xs command-delete"  data-row-id="' + row.id + '  data-toggle="tooltip" data-placement="left" title="<?php echo __('Delete'); ?>""><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button>';
                     return editBtn + deleteBtn;
                 }
             }
@@ -98,9 +98,9 @@
                                 success: function (response) {
                                     if (response.status === "1") {
                                         $("#grid").bootgrid("reload");
-                                        swal("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your group has been deleted!"); ?>", "success");
+                                        avideoAlert("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your group has been deleted!"); ?>", "success");
                                     } else {
-                                        swal("<?php echo __("Sorry!"); ?>", "<?php echo __("Your group has NOT been deleted!"); ?>", "error");
+                                        avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo __("Your group has NOT been deleted!"); ?>", "error");
                                     }
                                     modal.hidePleaseWait();
                                 }
@@ -133,9 +133,9 @@
                     if (response.status === "1") {
                         $('#groupFormModal').modal('hide');
                         $("#grid").bootgrid("reload");
-                        swal("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your group has been saved!"); ?>", "success");
+                        avideoAlert("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your group has been saved!"); ?>", "success");
                     } else {
-                        swal("<?php echo __("Sorry!"); ?>", "<?php echo __("Your group has NOT been saved!"); ?>", "error");
+                        avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo __("Your group has NOT been saved!"); ?>", "error");
                     }
                     modal.hidePleaseWait();
                 }

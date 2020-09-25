@@ -277,18 +277,18 @@ class VideoStatistic extends ObjectYPT {
         $res = sqlDAL::readSql($sql);
         $fullData = sqlDAL::fetchAllAssoc($res);
         sqlDAL::close($res);
-        // get the channel owner from each of those videos
         $channels = array();
         if ($res != false) {
+            $channelsPerUser = array();
+            // get the channel owner from each of those videos
             foreach ($fullData as $row) {
                 $users_id = Video::getOwner($row['videos_id']);
-                if (empty($channels[$users_id])) {
-                    $channels[$users_id] = array();
+                if (empty($channelsPerUser[$users_id])) {
+                    $channelsPerUser[$users_id] = array();
                 }
-                $channels[$users_id][] = $row['videos_id'];
+                $channelsPerUser[$users_id][] = $row['videos_id'];
             }
-
-            foreach ($channels as $key => $value) {
+            foreach ($channelsPerUser as $key => $value) {
                 // count how many views each one has
                 $sql2 = "SELECT count(id) as total FROM videos_statistics WHERE videos_id IN (" . implode(",", $value) . ") AND DATE(created) >= DATE_SUB(DATE(NOW()), INTERVAL {$daysLimit} DAY) ";
                 $res2 = sqlDAL::readSql($sql2);
@@ -302,9 +302,76 @@ class VideoStatistic extends ObjectYPT {
         }
         // return more first
         usort($channels, function($a, $b) {
-            return $b['total'] - $a['total'];
+            return $a['total'] - $b['total'];
         });
         return $channels;
+    }
+
+    static function getVideosWithMoreViews($status, $showOnlyLoggedUserVideos, $showUnlisted, $suggestedOnly, $daysLimit = 30) {
+        global $global;
+        // get unique videos ids from the requested timeframe
+        $sql = "SELECT distinct(videos_id) as videos_id FROM videos_statistics s "
+                . " LEFT JOIN videos v ON v.id = videos_id "
+                . " WHERE DATE(s.created) >= DATE_SUB(DATE(NOW()), INTERVAL {$daysLimit} DAY) ";
+
+        if ($showOnlyLoggedUserVideos === true && !User::isAdmin()) {
+            $sql .= " AND v.users_id = '" . User::getId() . "'";
+        } elseif (!empty($showOnlyLoggedUserVideos)) {
+            $sql .= " AND v.users_id = '{$showOnlyLoggedUserVideos}'";
+        }
+
+        if (!empty($_GET['channelName'])) {
+            $user = User::getChannelOwner($_GET['channelName']);
+            $sql .= " AND v.users_id = '{$user['id']}' ";
+        }
+        if ($status == "viewable") {
+            if (User::isLogged()) {
+                $sql .= " AND (v.status IN ('" . implode("','", Video::getViewableStatus($showUnlisted)) . "') OR (v.status='u' AND v.users_id ='" . User::getId() . "'))";
+            } else {
+                $sql .= " AND v.status IN ('" . implode("','", Video::getViewableStatus($showUnlisted)) . "')";
+            }
+        } elseif ($status == "viewableNotUnlisted") {
+            $sql .= " AND v.status IN ('" . implode("','", Video::getViewableStatus(false)) . "')";
+        } elseif (!empty($status)) {
+            $sql .= " AND v.status = '{$status}'";
+        }
+        $sql .= AVideoPlugin::getVideoWhereClause();
+
+        if ($suggestedOnly) {
+            $sql .= " AND v.isSuggested = 1 ";
+        }
+
+        $sql .= static::getSqlLimit();
+        $res = sqlDAL::readSql($sql);
+        $fullData = sqlDAL::fetchAllAssoc($res);
+        sqlDAL::close($res);
+        $channels = array();
+        $videos = array();
+        if ($res != false) {
+
+            foreach ($fullData as $key => $value) {
+                // count how many views each one has
+                $sql2 = "SELECT count(id) as total FROM videos_statistics WHERE videos_id = {$value['videos_id']} AND DATE(created) >= DATE_SUB(DATE(NOW()), INTERVAL {$daysLimit} DAY) ";
+                
+                $res2 = sqlDAL::readSql($sql2);
+                $result2 = sqlDAL::fetchAssoc($res2);
+                sqlDAL::close($res2);
+                if (!empty($result2)) {
+                    
+                    $video = Video::getVideo($value['videos_id'], $status, false, false, $suggestedOnly, $showUnlisted, false, $showOnlyLoggedUserVideos);
+                    if(empty($video)){
+                        continue;
+                    }
+                    $video['total'] = $result2['total'];
+                    $videos[] = $video;
+                }
+            }
+        }
+        // return more first
+        usort($videos, function($a, $b) {
+            return $a['total'] - $b['total'];
+        });
+        return $videos;
     }
 
     static function getUsersIDFromChannelsWithMoreViews($daysLimit = 30) {
@@ -314,6 +381,22 @@ class VideoStatistic extends ObjectYPT {
             $users_id[] = $value['users_id'];
         }
         return $users_id;
+    }
+
+    static function getChannelsTotalViews($users_id, $daysLimit = 30) {
+        global $global;
+        $users_id = intval($users_id);
+        // count how many views each one has
+        $sql2 = "SELECT count(s.id) as total FROM videos_statistics s "
+                . " LEFT JOIN videos v ON v.id = videos_id WHERE v.users_id = $users_id "
+                . " AND DATE(s.created) >= DATE_SUB(DATE(NOW()), INTERVAL {$daysLimit} DAY) ";
+        $res2 = sqlDAL::readSql($sql2);
+        $result2 = sqlDAL::fetchAssoc($res2);
+        sqlDAL::close($res2);
+        if (!empty($result2)) {
+            return intval($result2['total']);
+        }
+        return 0;
     }
 
 }

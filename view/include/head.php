@@ -33,12 +33,19 @@ foreach ($custom as $key => $value) {
     }
 }
 
+if(!empty($metaDescription)){
+    $metaDescription = implode(" - ", $custom)." - {$metaDescription}";
+}else{
+    $metaDescription = implode(" - ", $custom);
+}
+// for SEO to not rise an error of duplicated title or description of same pages with and without last slash
+$metaDescription .= getSEOComplement();
 $theme = $config->getTheme();
 ?>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="<?php echo implode(" - ", $custom); ?>">
+<meta name="description" content="<?php echo $metaDescription; ?>">
 
 <link rel="apple-touch-icon" sizes="180x180" href="<?php echo $config->getFavicon(true); ?>">
 <link rel="icon" type="image/png" href="<?php echo $config->getFavicon(true); ?>">
@@ -56,6 +63,7 @@ $cssFiles = array();
 //$cssFiles[] = "view/js/seetalert/sweetalert.css";
 $cssFiles[] = "view/bootstrap/bootstrapSelectPicker/css/bootstrap-select.min.css";
 $cssFiles[] = "view/js/bootgrid/jquery.bootgrid.css";
+$cssFiles[] = "view/js/jquery-toast/jquery.toast.min.css";
 $cssFiles[] = "view/css/custom/{$theme}.css";
 $cssFiles = array_merge($cssFiles);
 $cssURL = combineFiles($cssFiles, "css");
@@ -140,11 +148,13 @@ if (!$config->getDisable_analytics()) {
 }
 echo $config->getHead();
 echo $head;
-if (!empty($video['users_id'])) {
-    if (!empty($video)) {
+if (!empty($video)) {
+    if (!empty($video['users_id'])) {
         $userAnalytics = new User($video['users_id']);
         echo $userAnalytics->getAnalytics();
         unset($userAnalytics);
     }
 }
+ogSite();
+
 ?>

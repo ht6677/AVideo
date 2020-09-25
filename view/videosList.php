@@ -5,6 +5,10 @@ if (!isset($global['systemRootPath'])) {
 }
 require_once $global['systemRootPath'] . 'objects/user.php';
 require_once $global['systemRootPath'] . 'objects/functions.php';
+if(isBot()){
+    return;
+}
+
 require_once $global['systemRootPath'] . 'objects/video.php';
 $post = $_POST;
 if (!empty($_POST['video_id'])) {
@@ -22,15 +26,20 @@ if (empty($_GET['page'])) {
 } else {
     $_GET['page'] = intval($_GET['page']);
 }
-$_POST['current'] = $_GET['page'];
+$_REQUEST['current'] = $_GET['page'];
 
-if (empty($_POST['rowCount'])) {
+if (empty($_REQUEST['rowCount'])) {
     if (!empty($_SESSION['rowCount'])) {
-        $_POST['rowCount'] = $_SESSION['rowCount'];
+        $_REQUEST['rowCount'] = $_SESSION['rowCount'];
     } else {
-        $_POST['rowCount'] = 10;
+        $_REQUEST['rowCount'] = 10;
     }
 }
+
+if($_REQUEST['rowCount']<=0 || $_REQUEST['rowCount']>100){
+    $_REQUEST['rowCount']=10;
+}
+
 if (empty($_POST['sort'])) {
     if (!empty($_SESSION['sort'])) {
         $_POST['sort'] = $_SESSION['sort'];
@@ -38,13 +47,13 @@ if (empty($_POST['sort'])) {
         $_POST['sort']['created'] = 'desc';
     }
 }
-$_SESSION['rowCount'] = $_POST['rowCount'];
+$_SESSION['rowCount'] = $_REQUEST['rowCount'];
 $_SESSION['sort'] = $_POST['sort'];
 
 
 $videos = Video::getAllVideos("viewableNotUnlisted");
 $total = Video::getTotalVideos("viewableNotUnlisted");
-$totalPages = ceil($total / $_POST['rowCount']);
+$totalPages = ceil($total / $_REQUEST['rowCount']);
 $_POST = $post;
 if (empty($totalPages)) {
     $totalPages = 1;
@@ -63,7 +72,7 @@ if (!empty($_GET['channelName']) && empty($advancedCustomUser->hideRemoveChannel
     //var_dump($user);exit;
     ?>
     <div class="col-md-12" >
-        <img src="<?php echo User::getPhoto($user['id']); ?>" class="img img-responsive img-circle" style="max-width: 60px;"/>
+        <img src="<?php echo User::getPhoto($user['id']); ?>" class="img img-responsive img-circle" style="max-width: 60px;" alt="User Photo"/>
         <div style="position: absolute; right: 5px; top: 5px;">
             <button class="btn btn-default btn-xs btn-sm" onclick="loadPage(<?php echo $_GET['page']; ?>, true);"><?php echo User::getNameIdentificationById($user['id']); ?> <i class="fa fa-times"></i></button>
         </div>
@@ -92,11 +101,20 @@ if (empty($video['id'])) {
 </div>
 <div class="col-md-4 col-sm-12" style="position: relative; z-index: 2;">
     <select class="form-control" id="rowCount">
-        <option <?php echo (!empty($_POST['rowCount']) && $_POST['rowCount'] == '10') ? "selected='selected'" : "" ?>>10</option>
-        <option <?php echo (!empty($_POST['rowCount']) && $_POST['rowCount'] == '20') ? "selected='selected'" : "" ?>>20</option>
-        <option <?php echo (!empty($_POST['rowCount']) && $_POST['rowCount'] == '30') ? "selected='selected'" : "" ?>>30</option>
-        <option <?php echo (!empty($_POST['rowCount']) && $_POST['rowCount'] == '40') ? "selected='selected'" : "" ?>>40</option>
-        <option <?php echo (!empty($_POST['rowCount']) && $_POST['rowCount'] == '50') ? "selected='selected'" : "" ?>>50</option>
+        <?php
+        $jsonArray = json_decode($advancedCustom->videosListRowCount);
+        foreach ($jsonArray as $item) {
+            if($item==-1){
+            ?>
+            <option <?php echo (!empty($_REQUEST['rowCount']) && $_REQUEST['rowCount'] == $item) ? "selected='selected'" : "" ?>><?php echo __("All"); ?></option>
+            <?php
+            }else{
+            ?>
+            <option <?php echo (!empty($_REQUEST['rowCount']) && $_REQUEST['rowCount'] == $item) ? "selected='selected'" : "" ?>><?php echo $item; ?></option>
+            <?php
+            }
+        }
+        ?>
     </select>
 </div>
 
@@ -108,7 +126,7 @@ foreach ($videos as $key => $value) {
     }
     $name = User::getNameIdentificationById($value['users_id']) . ' ' . User::getEmailVerifiedIcon($value['users_id']);
     $value['creator'] = '<div class="pull-left">'
-            . '<a href="' . User::getChannelLink($value['users_id']) . '"><img src="' . User::getPhoto($value['users_id']) . '" alt="" class="img img-responsive img-circle zoom" style="max-width: 20px;"/></div><div class="commentDetails" style="margin-left:25px;"><div class="commenterName text-muted"><strong>' . $name . '</strong> <small>'
+            . '<a href="' . User::getChannelLink($value['users_id']) . '"><img src="' . User::getPhoto($value['users_id']) . '" alt="User Photo" class="img img-responsive img-circle zoom" style="max-width: 20px;"/></div><div class="commentDetails" style="margin-left:25px;"><div class="commenterName text-muted"><strong>' . $name . '</strong> <small>'
             . '</a>' . humanTiming(strtotime($value['videoCreation'])) . '</small></div></div>';
     ?>
     <div class="col-lg-12 col-sm-12 col-xs-12 bottom-border" id="divVideo-<?php echo $value['id']; ?>" >
@@ -208,7 +226,7 @@ foreach ($videos as $key => $value) {
             </a>
             <div class="details row" itemprop="description">
                 <div class="col-sm-6 nopadding">
-                    <a class="label label-default" href="<?php echo $global['webSiteRootURL']; ?>cat/<?php echo $value['clean_category']; ?>/">
+                    <a class="label label-default" href="<?php echo $global['webSiteRootURL']; ?>cat/<?php echo $value['clean_category']; ?>">
                         <span class="<?php echo $value['iconClass']; ?>"></span>
                         <span class="hidden-sm"><?php echo $value['category']; ?></span>
                     </a>

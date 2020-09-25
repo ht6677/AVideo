@@ -4,6 +4,12 @@ require_once $global['systemRootPath'] . 'plugin/Plugin.abstract.php';
 require_once $global['systemRootPath'] . 'plugin/AVideoPlugin.php';
 class YouPHPFlix2 extends PluginAbstract {
 
+    public function getTags() {
+        return array(
+            PluginTags::$NETFLIX,
+            PluginTags::$FREE,
+        );
+    }
     public function getDescription() {
         $txt = "Make the first page looks like a Netflix site";
         $help = "<br><small><a href='https://github.com/WWBN/AVideo/wiki/Configure-a-Netflix-Clone-Page' target='__blank'><i class='fas fa-question-circle'></i> Help</a></small>";
@@ -68,7 +74,8 @@ class YouPHPFlix2 extends PluginAbstract {
     
     public function getFirstPage(){
         global $global; 
-        if(!AVideoPlugin::isEnabled("d3sa2k4l3-23rds421-re323-4ae-423")){
+        
+        if(!AVideoPlugin::isEnabledByName("CombineSites")){
             return $global['systemRootPath'].'plugin/YouPHPFlix2/view/modeFlix.php';
         }
     }   
@@ -117,10 +124,5 @@ class YouPHPFlix2 extends PluginAbstract {
         $js .= '<script src="' . $global['webSiteRootURL'] . 'plugin/YouPHPFlix2/view/js/fullscreen.js"></script>';
         return $js;
     }
-    
-    public function getTags() {
-        return array('free', 'firstPage', 'netflix');
-    }
-
     
 }

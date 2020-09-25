@@ -6,6 +6,11 @@ require_once $global['systemRootPath'] . 'plugin/YouTubeAPI/Objects/YouTubeUploa
 
 class YouTubeAPI extends PluginAbstract {
 
+    public function getTags() {
+        return array(
+            PluginTags::$FREE,
+        );
+    }
     public function getDescription() {
         $txt = "Upload your videos to YouTube using the YouTube API.<br>";
         //$txt .= "You can acquire an OAuth 2.0 <b>client ID</b> and <b>client secret</b> from the <a href='https://cloud.google.com/console'>Google Cloud Console</a>";
@@ -343,9 +348,9 @@ class YouTubeAPI extends PluginAbstract {
       type: 'post',
       success: function (response) {
       if(response.error){
-      swal('" . __("Sorry!") . "', response.msg, 'error');
+      avideoAlert('" . __("Sorry!") . "', response.msg, 'error');
       }else{
-      swal('" . __("Congratulations!") . "', response.msg, 'success');
+      avideoAlert('" . __("Congratulations!") . "', response.msg, 'success');
       }
       console.log(response);
       modal.hidePleaseWait();
@@ -358,14 +363,14 @@ class YouTubeAPI extends PluginAbstract {
       url: '{$global['webSiteRootURL']}plugin/YouTubeAPI/uploadAll.json.php',
       success: function (response) {
       if(response.error){
-      swal('" . __("Sorry!") . "', response.msg, 'error');
+      avideoAlert('" . __("Sorry!") . "', response.msg, 'error');
       }else{
-      swal('" . __("Congratulations!") . "', response.msg, 'success');
+      avideoAlert('" . __("Congratulations!") . "', response.msg, 'success');
       }
       console.log(response);
       }
       });
-      swal('" . __("Process Start") . "', 'It may take a while', 'warning');
+      avideoAlert('" . __("Process Start") . "', 'It may take a while', 'warning');
       }</script>";
       }
       return $js;

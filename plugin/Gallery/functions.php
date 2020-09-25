@@ -46,23 +46,24 @@ function createGallery($title, $sort, $rowCount, $getName, $mostWord, $lessWord,
             $_GET['page'] = 1;
         }
         $_POST['sort'][$sort] = $_GET[$getName];
-        $_POST['current'] = $_GET['page'];
-        $_POST['rowCount'] = $rowCount;
+        $_REQUEST['current'] = $_GET['page'];
+        $_REQUEST['rowCount'] = $rowCount;
 
         $total = Video::getTotalVideos("viewable");
-        $totalPages = ceil($total / $_POST['rowCount']);
+        $totalPages = ceil($total / $_REQUEST['rowCount']);
         $page = $_GET['page'];
         if ($totalPages < $_GET['page']) {
             $page = $totalPages;
-            $_POST['current'] = $totalPages;
+            $_REQUEST['current'] = $totalPages;
         }
         $videos = Video::getAllVideos("viewableNotUnlisted", false, $ignoreGroup);
         // need to add dechex because some times it return an negative value and make it fails on javascript playlists
         $countCols = createGallerySection($videos, dechex(crc32($getName)));
         ?>
         <div class="col-sm-12" style="z-index: 1;">
-            <ul id="<?php echo $paggingId; ?>">
-            </ul>
+            <?php 
+            echo getPagination($totalPages, $page, "{$url}{page}{$args}");
+            ?>
         </div>
     </div>
     <?php
@@ -75,26 +76,6 @@ function createGallery($title, $sort, $rowCount, $getName, $mostWord, $lessWord,
         </style>
         <?php
     }
-    ?>
-    <script>
-    <?php
-    if ($totalPages > 1) {
-        ?>
-            $(document).ready(function () {
-                $('#<?php echo $paggingId; ?>').bootpag({
-                    total: <?php echo $totalPages; ?>,
-                    page: <?php echo $page; ?>,
-                    maxVisible: 10
-                }).on('page', function (event, num) {
-        <?php echo 'var args = "' . $args . '";'; ?>
-                    window.location.replace("<?php echo $url; ?>" + num + args);
-                });
-            });
-        <?php
-    }
-    ?>
-    </script>
-    <?php
 }
 
 function createOrderInfo($getName, $mostWord, $lessWord, $orderString) {
@@ -231,7 +212,7 @@ function createGallerySection($videos, $crc = "", $get = array(), $ignoreAds = f
             <div class="text-muted galeryDetails" style="overflow: hidden;">
                 <div>
                     <?php if (empty($_GET['catName'])) { ?>
-                        <a class="label label-default" href="<?php echo $global['webSiteRootURL']; ?>cat/<?php echo $value['clean_category']; ?>/">
+                        <a class="label label-default" href="<?php echo $global['webSiteRootURL']; ?>cat/<?php echo $value['clean_category']; ?>">
                             <?php
                             if (!empty($value['iconClass'])) {
                                 ?>
@@ -282,15 +263,16 @@ function createGallerySection($videos, $crc = "", $get = array(), $ignoreAds = f
                 </div>
                 <div>
                     <i class="fa fa-user"></i>
-                    <a class="text-muted" href="<?php echo User::getChannelLink($value['users_id']); ?>/">
+                    <a class="text-muted" href="<?php echo User::getChannelLink($value['users_id']); ?>">
                         <?php echo $name; ?>
                     </a>
                     <?php
                     if ((!empty($value['description'])) && !empty($obj->Description)) {
                         $desc = str_replace(array('"', "'", "#", "/", "\\"), array('``', "`", "", "", ""), preg_replace("/\r|\n/", " ", nl2br(trim($value['description']))));
                         if (!empty($desc)) {
+                            $titleAlert = str_replace(array('"', "'"), array('``', "`"), $value['title']);
                             ?>
-                            <a href="#" onclick='alertHTMLText("<?php echo str_replace(array('"', "'"), array('``', "`"), $value['title']); ?>", "<div style=\"max-height: 300px; overflow-y: scroll;overflow-x: hidden;\"><?php echo $desc; ?></div>");return false;' ><i class="far fa-file-alt"></i> <?php echo __("Description"); ?></a>
+                            <a href="#" onclick='avideoAlert("<?php echo $titleAlert; ?>", "<div style=\"max-height: 300px; overflow-y: scroll;overflow-x: hidden;\"><?php echo $desc; ?></div>", "info");return false;' ><i class="far fa-file-alt"></i> <?php echo __("Description"); ?></a>
                             <?php
                         }
                     }
@@ -404,7 +386,7 @@ function createChannelItem($users_id, $photoURL = "", $identification = "", $row
         <h3 class="galleryTitle">
             <img src="<?php
             echo $photoURL;
-            ?>" class="img img-circle img-responsive pull-left" style="max-height: 20px;">
+            ?>" class="img img-circle img-responsive pull-left" style="max-height: 20px;" alt="Channel Owner">
             <span style="margin: 0 5px;">
                 <?php
                 echo $identification;
@@ -417,13 +399,13 @@ function createChannelItem($users_id, $photoURL = "", $identification = "", $row
             echo Subscribe::getButton($users_id);
             ?>
         </h3>
-        <div class="row">
+        <div class="">
             <?php
             $countCols = 0;
             unset($_POST['sort']);
             $_POST['sort']['created'] = "DESC";
-            $_POST['current'] = 1;
-            $_POST['rowCount'] = $rowCount;
+            $_REQUEST['current'] = 1;
+            $_REQUEST['rowCount'] = $rowCount;
             $videos = Video::getAllVideos("viewable", $users_id);
             createGallerySection($videos);
             ?>

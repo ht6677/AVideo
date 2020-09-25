@@ -4,6 +4,12 @@ require_once $global['systemRootPath'] . 'plugin/Plugin.abstract.php';
 
 class Hotkeys extends PluginAbstract {
 
+    public function getTags() {
+        return array(
+            PluginTags::$FREE,
+            PluginTags::$PLAYER,
+        );
+    }
     public function getDescription() {
         global $global;
         return "Enable hotkeys for videos, like F for fullscreen, space for play/pause, etc..<br />Author: <a href='http://hersche.github.io' target='_blank' >Vinzenz Hersche</a>";
@@ -23,7 +29,7 @@ class Hotkeys extends PluginAbstract {
     
     public function getHelp(){
         $obj = $this->getDataObject();
-        $html = "<h2 id='Hotkeys help' >Hotkeys</h2><p>".__("When you are watching media, you can use these keyboard-shortcuts.")."</p><table class='table'><tbody>";
+        $html = "<h2 id='Hotkeys help' >".__('Hotkeys')."</h2><p>".__("When you are watching media, you can use these keyboard-shortcuts.")."</p><table class='table'><tbody>";
         $html .= "<tr><td>".__("Seek")."</td><td>".__("Left")."/".__("right")."-".__("arrow")."</td></tr><tr><td>";
         if($obj->ReplaceVolumeWithPlusMinus){
             $html .= __("Volume")."</td><td>+/-</td></tr>";
@@ -57,12 +63,7 @@ class Hotkeys extends PluginAbstract {
         $obj->PlayPauseKey = " ";
         $obj->AlwaysCaptureHotkeys = true;
         return $obj;
-    }
-    
-    public function getTags() {
-        return array('free', 'videos', 'hotkeys');
-    }
-    
+    }    
 
     public function getFooterCode() {
         global $global;

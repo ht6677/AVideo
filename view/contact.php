@@ -8,6 +8,7 @@ $email = "";
 if (User::isLogged()) {
     $email = User::getEmail_();
 }
+$metaDescription = " Contact Form";
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $_SESSION['language']; ?>">
@@ -137,12 +138,12 @@ if (User::isLogged()) {
                     success: function (response) {
                         modal.hidePleaseWait();
                         if (!response.error) {
-                            swal("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your message has been sent!"); ?>", "success");
+                            avideoAlert("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your message has been sent!"); ?>", "success");
 
                             $("#contact_form").hide();
                             $("#messageSuccess").fadeIn();
                         } else {
-                            swal("<?php echo __("Your message could not be sent!"); ?>", response.error, "error");
+                            avideoAlert("<?php echo __("Your message could not be sent!"); ?>", response.error, "error");
                         }
                         $('#btnReloadCapcha').trigger('click');
                     }

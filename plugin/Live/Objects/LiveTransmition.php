@@ -1,4 +1,5 @@
 <?php
+
 require_once dirname(__FILE__) . '/../../../videos/configuration.php';
 require_once dirname(__FILE__) . '/../../../objects/bootGrid.php';
 require_once dirname(__FILE__) . '/../../../objects/user.php';
@@ -58,7 +59,7 @@ class LiveTransmition extends ObjectYPT {
     }
 
     function setPublic($public) {
-        $this->public = $public;
+        $this->public = intval($public);
     }
 
     function setSaveTransmition($saveTransmition) {
@@ -93,6 +94,16 @@ class LiveTransmition extends ObjectYPT {
         return true;
     }
 
+    function loadByKey($uuid) {
+        $row = self::getFromKey($uuid);
+        if (empty($row))
+            return false;
+        foreach ($row as $key => $value) {
+            $this->$key = $value;
+        }
+        return true;
+    }
+
     static function getFromDbByUser($user_id) {
         global $global;
         $user_id = intval($user_id);
@@ -108,8 +119,8 @@ class LiveTransmition extends ObjectYPT {
         return $user;
     }
 
-    static function createTransmitionIfNeed($user_id) { 
-        if(empty($user_id)){
+    static function createTransmitionIfNeed($user_id) {
+        if (empty($user_id)) {
             return false;
         }
         $row = static::getFromDbByUser($user_id);
@@ -130,8 +141,13 @@ class LiveTransmition extends ObjectYPT {
         $row = static::getFromDbByUser($user_id);
 
         $l = new LiveTransmition($row['id']);
-        $l->setKey(uniqid());
-        return $l->save();
+        $newKey = uniqid();
+        $l->setKey($newKey);
+        if($l->save()){
+            return $newKey;
+        }else{
+            return false;
+        }
     }
 
     static function getFromDbByUserName($userName) {
@@ -171,7 +187,8 @@ class LiveTransmition extends ObjectYPT {
     function save() {
         $this->public = intval($this->public);
         $this->saveTransmition = intval($this->saveTransmition);
-        return parent::save();
+        $id = parent::save();
+        return $id;
     }
 
     function deleteGroupsTrasmition() {
@@ -240,6 +257,20 @@ class LiveTransmition extends ObjectYPT {
         } else {
             return true;
         }
+    }
+
+    static function getFromKey($key) {
+        global $global;
+        $sql = "SELECT * FROM " . static::getTableName() . " WHERE  `key` = ? LIMIT 1";
+        $res = sqlDAL::readSql($sql, "s", array($key), true);
+        $data = sqlDAL::fetchAssoc($res);
+        sqlDAL::close($res);
+        if ($res != false) {
+            $user = $data;
+        } else {
+            $user = false;
+        }
+        return $user;
     }
 
 }

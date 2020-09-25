@@ -109,7 +109,7 @@ $obj = AVideoPlugin::getObjectDataIfEnabled("YPTWallet");
 
         <div class="hidden" id="model">
             <div style="background-image: url('{background}'); background-size: cover; height: 50px; width: 100%;" >
-                <img src="{photo}" class="pull-left img img-responsive img-circle" style="max-height: 40px;">
+                <img src="{photo}" class="pull-left img img-responsive img-circle" style="max-height: 40px;" alt="User Photo">
                 <div class="pull-left">
                     {identification}
                 </div>
@@ -151,11 +151,11 @@ $obj = AVideoPlugin::getObjectDataIfEnabled("YPTWallet");
                                         modal.hidePleaseWait();
                                         if (response.error) {
                                             setTimeout(function () {
-                                                swal("<?php echo __("Sorry!"); ?>", response.msg, "error");
+                                                avideoAlert("<?php echo __("Sorry!"); ?>", response.msg, "error");
                                             }, 500);
                                         } else {
                                             setTimeout(function () {
-                                                swal("<?php echo __("Congratulations!"); ?>", "<?php echo __("Funds successfully transferred"); ?>", "success");
+                                                avideoAlert("<?php echo __("Congratulations!"); ?>", "<?php echo __("Funds successfully transferred"); ?>", "success");
                                             }, 500);
                                         }
                                     }

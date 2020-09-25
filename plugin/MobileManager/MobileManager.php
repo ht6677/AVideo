@@ -5,6 +5,12 @@ require_once $global['systemRootPath'] . 'objects/video.php';
 
 class MobileManager extends PluginAbstract {
     
+    public function getTags() {
+        return array(
+            PluginTags::$FREE,
+            PluginTags::$MOBILE
+        );
+    }
     public static function getVersion(){
         return 2;
     }
@@ -27,10 +33,6 @@ class MobileManager extends PluginAbstract {
         return "1.0";   
     }
 
-    public function getTags() {
-        return array('free', 'mobile', 'android', 'ios');
-    }  
-        
     public function getEmptyDataObject() {   
         global $global;   
         $obj = new stdClass();                
@@ -49,7 +51,7 @@ class MobileManager extends PluginAbstract {
         
         $o = new stdClass();
         $o->type = "textarea";
-        $o->value = "This Software must be used for Good, never Evil. It is expressly forbidden to use this app to build porn sites, violence, racism or anything else that affects human integrity or denigrates the image of anyone.\n"
+        $o->value = "This Software must be used for Good, never Evil. There is no tolerance for objectionable content or abusive users. It is expressly forbidden to use this app to build porn sites, violence, racism or anything else that affects human integrity or denigrates the image of anyone.\n"
                 . "Any complaints, or through the application or any other electronic means will be analyzed and in case of any criteria established by the developer or local laws, are disrespected, we reserve the right to block and ban any site from our systems\n"
                 . "The banned site will be prohibited from using any of our resources, including mobile applications, encoder, plugins, etc.";     
         $obj->EULA = $o;
@@ -74,6 +76,10 @@ class MobileManager extends PluginAbstract {
         
         
         $obj->disableWhitelabel = false;
+        $obj->approvalMode = false;
+        $obj->showMeet = true;
+        $obj->goLiveWithMeet = true;
+        $obj->doNotAutoSearch = false;
         
         return $obj;
     }

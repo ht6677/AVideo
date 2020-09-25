@@ -6,10 +6,20 @@ require_once $global['systemRootPath'] . 'plugin/LiveLinks/Objects/LiveLinksTabl
 
 class LiveLinks extends PluginAbstract {
 
+    public function getTags() {
+        return array(
+            PluginTags::$LIVE,
+            PluginTags::$FREE,
+            PluginTags::$PLAYER,
+        );
+    }
+
     public function getDescription() {
         $desc = "Register Livestreams external Links from any HLS provider, Wowza and others";
         $desc .= $this->isReadyLabel(array('Live'));
-        return $desc;
+        $help = "<br><small><a href='https://github.com/WWBN/AVideo/wiki/LiveLinks-Plugin' target='__blank'><i class='fas fa-question-circle'></i> Help</a></small>";
+
+        return $desc.$help;
     }
 
     public function getName() {
@@ -22,6 +32,7 @@ class LiveLinks extends PluginAbstract {
         $obj->onlyAdminCanAddLinks = true;
         $obj->buttonTitle = "Add a Live Link";
         $obj->disableGifThumbs = false;
+        $obj->doNotShowLiveLinksLabel = false;
         return $obj;
     }
 
@@ -79,6 +90,7 @@ class LiveLinks extends PluginAbstract {
         $obj = $this->getDataObject();
         $filename = $global['systemRootPath'] . 'plugin/LiveLinks/view/menuItem.html';
         $filenameExtra = $global['systemRootPath'] . 'plugin/LiveLinks/view/extraItem.html';
+        $filenameExtraVideoPage = $global['systemRootPath'] . 'plugin/LiveLinks/view/extraItemVideoPage.html';
         $row = LiveLinks::getAllActive();
         $array = array();
         $search = array(
@@ -94,6 +106,7 @@ class LiveLinks extends PluginAbstract {
         );
         $content = file_get_contents($filename);
         $contentExtra = file_get_contents($filenameExtra);
+        $contentExtraVideoPage = file_get_contents($filenameExtraVideoPage);
         
         if(empty($_GET['requestComesFromVideoPage'])){
             $regex = "/".addcslashes($global['webSiteRootURL'],"/")."video\/.*/";
@@ -127,14 +140,17 @@ class LiveLinks extends PluginAbstract {
 
             $newContent = str_replace($search, $replace, $content);
             $newContentExtra = str_replace($search, $replace, $contentExtra);
+            $newContentExtraVideoPage = str_replace($search, $replace, $contentExtraVideoPage);
             $array[] = array(
+                "type" => "LiveLink",
                 "html" => $newContent,
                 "htmlExtra" => $newContentExtra,
+                "htmlExtraVideoPage" => $newContentExtraVideoPage,
                 "UserPhoto" => $UserPhoto,
                 "title" => $value['title'],
                 "name" => $name,
-                "poster" => "{$global['webSiteRootURL']}plugin/LiveLinks/getImage.php?id={$value['id']}&format=jpg",
-                "link" => "{$global['webSiteRootURL']}plugin/LiveLinks/view/Live.php?link={$value['id']}&embed=1"
+                "poster" => self::getPosterToLiveFromId($value['id']),
+                "link" => self::getLinkToLiveFromId($value['id'], true)
             );
         }
 
@@ -146,6 +162,30 @@ class LiveLinks extends PluginAbstract {
         global $global;
         sqlDal::writeSql(file_get_contents($global['systemRootPath'] . 'plugin/LiveLinks/install/updateV2.0.sql'));
         return true;
+    }
+    
+    
+    public function getHeadCode() {
+        global $global;
+        $obj = $this->getDataObject();
+        // preload image
+        $js = "";
+        $css = '';
+        if(!empty($obj->doNotShowLiveLinksLabel)){
+            $css .= '<style>.livelinksLabel{display: none;}</style>';
+        }
+        
+        return $js.$css;
+    }
+    
+    public function getLinkToLiveFromId($id, $embed=false){
+        global $global;
+        return "{$global['webSiteRootURL']}plugin/LiveLinks/view/Live.php?link={$id}".($embed?"&embed=1":"");
+    }
+
+    public function getPosterToLiveFromId($id){
+        global $global;
+        return "{$global['webSiteRootURL']}plugin/LiveLinks/getImage.php?id={$id}&format=jpg";
     }
 
 }

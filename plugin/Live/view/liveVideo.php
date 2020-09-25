@@ -1,3 +1,7 @@
+<?php
+$_REQUEST['live_servers_id'] = Live::getLiveServersIdRequest();
+$poster = Live::getPosterImage($livet['users_id'], $_REQUEST['live_servers_id']);
+?>
 <link href="<?php echo $global['webSiteRootURL']; ?>plugin/Live/view/live.css" rel="stylesheet" type="text/css"/>
 <div class="row main-video" id="mvideo">
     <div class="firstC col-sm-2 col-md-2"></div>
@@ -12,10 +16,10 @@
                 </button>
             </div>
             <div id="main-video" class="embed-responsive embed-responsive-16by9">
-                <video poster="<?php echo $global['webSiteRootURL']; ?>plugin/Live/view/OnAir.jpg" controls playsinline webkit-playsinline="webkit-playsinline" 
+                <video poster="<?php echo $global['webSiteRootURL']; ?><?php echo $poster; ?>?<?php echo filectime($global['systemRootPath'] . $poster); ?>" controls playsinline webkit-playsinline="webkit-playsinline" 
                        class="embed-responsive-item video-js vjs-default-skin vjs-big-play-centered liveVideo vjs-16-9" 
                        id="mainVideo">
-                    <source src="<?php echo $p->getM3U8File($uuid); ?>" type='application/x-mpegURL'>
+                    <source src="<?php echo Live::getM3U8File($uuid); ?>" type='application/x-mpegURL'>
                 </video>
                 <?php
                 if (AVideoPlugin::isEnabled("0e225f8e-15e2-43d4-8ff7-0cb07c2a2b3b")) {
@@ -24,7 +28,7 @@
                     $url = VideoLogoOverlay::getLink();
                     ?>
                     <div style="<?php echo $style; ?>">
-                        <a href="<?php echo $url; ?>" target="_blank"> <img src="<?php echo $global['webSiteRootURL']; ?>videos/logoOverlay.png" class="img-responsive col-lg-12 col-md-8 col-sm-7 col-xs-6"></a>
+                        <a href="<?php echo $url; ?>" target="_blank"> <img src="<?php echo $global['webSiteRootURL']; ?>videos/logoOverlay.png" alt="Logo" class="img-responsive col-lg-12 col-md-8 col-sm-7 col-xs-6"></a>
                     </div>
                 <?php } ?>
 
@@ -37,50 +41,12 @@
                 include $global['systemRootPath'] . 'plugin/Live/view/onlineUsers.php';
                 ?>
             </div>
-
-
-            <?php
-            $liveCount = AVideoPlugin::loadPluginIfEnabled('LiveCountdownEvent');
-            $html = array();
-            if ($liveCount) {
-                $html = $liveCount->getNextLiveApplicationFromUser($user_id);
-            }
-            foreach ($html as $value) {
-                echo $value['html'];
-            };
-            ?>
         </div>
     </div>
     <div class="col-sm-2 col-md-2"></div>
 </div>
-
-
-
 <script>
-
-    $(document).ready(function () {
-        if (typeof player === 'undefined') {
-            player = videojs('mainVideo'<?php echo PlayerSkins::getDataSetup(); ?>);
-        }
-        player.ready(function () {
-            var err = this.error();
-            if (err && err.code) {
-                $('.vjs-error-display').hide();
-                $('#mainVideo').find('.vjs-poster').css({'background-image': 'url(<?php echo $global['webSiteRootURL']; ?>plugin/Live/view/Offline.jpg)'});
 <?php
-if (!empty($html)) {
-    echo "showCountDown();";
-}
+echo PlayerSkins::getStartPlayerJS();
 ?>
-            }
-        });
-<?php
-if ($config->getAutoplay()) {
-    echo "setTimeout(function(){playerPlay(0);},500);";
-}
-?>
-        player.persistvolume({
-            namespace: "AVideo"
-        });
-    });
 </script>

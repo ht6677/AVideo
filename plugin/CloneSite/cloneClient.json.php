@@ -17,7 +17,7 @@ require_once $global['systemRootPath'] . 'plugin/CloneSite/CloneLog.php';
 require_once $global['systemRootPath'] . 'plugin/CloneSite/functions.php';
 
 $totalSteps = 7;
-
+$total2 = $total = 0;
 $resp = new stdClass();
 $resp->error = true;
 $resp->msg = "";
@@ -27,6 +27,7 @@ $log = new CloneLog();
 $log->add("Clone: Clone Start");
 
 $objClone = AVideoPlugin::getObjectDataIfEnabled("CloneSite");
+$objClone->cloneSiteURL = rtrim($objClone->cloneSiteURL,"/").'/';
 $objCloneOriginal = $objClone;
 $argv[1] = preg_replace("/[^A-Za-z0-9 ]/", '', @$argv[1]);
 
@@ -151,7 +152,11 @@ if (empty($objClone->useRsync)) {
 } else {
     // decrypt the password now
     $objClone = Plugin::decryptIfNeed($objClone);
-    $rsync = "sshpass -p '{password}' rsync -av -e 'ssh -o StrictHostKeyChecking=no' --exclude '*.php' --exclude 'cache' --exclude '*.sql' --exclude '*.log' {$objClone->cloneSiteSSHUser}@{$objClone->cloneSiteSSHIP}:{$json->videosDir} {$global['systemRootPath']}videos/ --log-file='{$log->file}' ";
+    $port = intval($objClone->cloneSiteSSHPort);
+    if(empty($port)){
+        $port = 22;
+    }
+    $rsync = "sshpass -p '{password}' rsync -av -e 'ssh  -p {$port} -o StrictHostKeyChecking=no' --exclude '*.php' --exclude 'cache' --exclude '*.sql' --exclude '*.log' {$objClone->cloneSiteSSHUser}@{$objClone->cloneSiteSSHIP}:{$json->videosDir} {$global['systemRootPath']}videos/ --log-file='{$log->file}' ";
     $cmd = str_replace("{password}", $objClone->cloneSiteSSHPassword->value, $rsync);
     $log->add("Clone (4 of {$totalSteps}): execute rsync ({$rsync})");
     

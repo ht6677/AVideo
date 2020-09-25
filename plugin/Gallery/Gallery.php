@@ -4,6 +4,14 @@ require_once $global['systemRootPath'] . 'plugin/Plugin.abstract.php';
 require_once $global['systemRootPath'] . 'plugin/AVideoPlugin.php';
 class Gallery extends PluginAbstract {
 
+    public function getTags() {
+        return array(
+            PluginTags::$RECOMMENDED,
+            PluginTags::$FREE,
+            PluginTags::$GALLERY,
+            PluginTags::$LAYOUT,
+        );
+    }
     public function getDescription() {
         return "Make the first page works as a gallery";
     }
@@ -24,7 +32,7 @@ class Gallery extends PluginAbstract {
         global $global;
         $obj = $this->getDataObject();
         // preload image
-        $js = "<script>var img1 = new Image();img1.src=\"{$global['webSiteRootURL']}view/img/video-placeholder.png\";</script>";
+        $js = "<script>var img1 = new Image();img1.src=\"{$global['webSiteRootURL']}view/img/video-placeholder-gray.png\";</script>";
         $css = '<link href="' . $global['webSiteRootURL'] . 'plugin/Gallery/style.css" rel="stylesheet" type="text/css"/>';
         if(!empty($obj->playVideoOnFullscreen) && (!empty($_GET['videoName']) || !empty($_GET['evideo']))){
             $css .= '<link href="' . $global['webSiteRootURL'] . 'plugin/Gallery/fullscreen.css" rel="stylesheet" type="text/css"/>';
@@ -88,20 +96,16 @@ class Gallery extends PluginAbstract {
   
     public function getHelp(){
         if(User::isAdmin()){
-            return "<h2 id='Gallery help'>Gallery options (admin)</h2><table class='table'><thead><th>Option-name</th><th>Default</th><th>Description</th></thead><tbody><tr><td>BigVideo</td><td>checked</td><td>Create a big preview with a direct description on top</td></tr><tr><td>DateAdded,MostPopular,MostWatched,SortByName</td><td>checked,checked,checked,unchecked</td><td>Metacategories</td></tr><tr><td>SubCategorys</td><td>unchecked</td> <td>Enable a view for subcategories on top</td></tr><tr><td>Description</td><td>unchecked</td><td>Enable a small button for show the description</td></tr></tbody></table>";   
+            return "<h2 id='Gallery help'>".__('Gallery options (admin)')."</h2><table class='table'><thead><th>".__('Option-name')."</th><th>".__('Default')."</th><th>".__('Description')."</th></thead><tbody><tr><td>BigVideo</td><td>".__('checked')."</td><td>".__('Create a big preview with a direct description on top')."</td></tr><tr><td>DateAdded,MostPopular,MostWatched,SortByName</td><td>".__('checked').",".__('checked').",".__('checked').",".__('unchecked')."</td><td>".__('Metacategories')."</td></tr><tr><td>SubCategorys</td><td>".__('unchecked')."</td> <td>".__('Enable a view for subcategories on top')."</td></tr><tr><td>Description</td><td>".__('unchecked')."</td><td>".__('Enable a small button for show the description')."</td></tr></tbody></table>";   
         }
         return "";
     }
     public function getFirstPage(){
         global $global;
-        if(!AVideoPlugin::isEnabled("d3sa2k4l3-23rds421-re323-4ae-423")){
+        if(!AVideoPlugin::isEnabledByName("YouPHPFlix2") && !AVideoPlugin::isEnabledByName("CombineSites")){
             return $global['systemRootPath'].'plugin/Gallery/view/modeGallery.php';
         }
     }   
-    
-    public function getTags() {
-        return array('free', 'firstPage', 'gallery');
-    }
     
     public function getFooterCode() {
         $obj = $this->getDataObject();

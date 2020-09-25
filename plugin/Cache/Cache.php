@@ -3,6 +3,13 @@
 require_once $global['systemRootPath'] . 'plugin/Plugin.abstract.php';
 
 class Cache extends PluginAbstract {
+    
+    public function getTags() {
+        return array(
+            PluginTags::$RECOMMENDED,
+            PluginTags::$FREE
+        );
+    }
 
     public function getDescription() {
         $txt = "AVideo application accelerator to cache pages.<br>Your website has 10,000 visitors who are online, and your dynamic page has to send 10,000 times the same queries to database on every page load. With this plugin, your page only sends 1 query to your DB, and uses the cache to serve the 9,999 other visitors.";
@@ -51,10 +58,6 @@ class Cache extends PluginAbstract {
             }
         }
         return $obj->cacheDir . $firstPage;
-    }
-
-    public function getTags() {
-        return array('free', 'cache', 'speed up');
     }
 
     private function getFileName() {
@@ -134,7 +137,7 @@ class Cache extends PluginAbstract {
             // if is a bot always show a cache
             if (file_exists($cachefile) && (((time() - $lifetime) <= filemtime($cachefile)) || $isBot)) {
                 if ($isBot && $_SERVER['REQUEST_URI'] !== '/login') {
-                    _error_log("Bot Detected, showing the cache ({$_SERVER['REQUEST_URI']}) FROM: {$_SERVER['REMOTE_ADDR']} Browser: {$_SERVER['HTTP_USER_AGENT']}");
+                    //_error_log("Bot Detected, showing the cache ({$_SERVER['REQUEST_URI']}) FROM: {$_SERVER['REMOTE_ADDR']} Browser: {$_SERVER['HTTP_USER_AGENT']}");
                 }
                 $c = @local_get_contents($cachefile);
                 if (preg_match("/\.json\.?/", $baseName)) {

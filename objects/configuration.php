@@ -77,7 +77,7 @@ class Configuration {
         }
         $this->users_id = User::getId();
 
-
+        ObjectYPT::deleteCache("getEncoderURL");
 
         $sql = "UPDATE configurations SET "
                 . "video_resolution = '{$this->video_resolution}',"
@@ -211,9 +211,11 @@ class Configuration {
         }
         return $this->logo . $get;
     }
-
-    function getFavicon($getPNG = false) {
+    
+    static function _getFavicon($getPNG = false) {
         global $global;
+        $file = false;
+        $url = false;
         if (!$getPNG) {
             $file = $global['systemRootPath'] . "videos/favicon.ico";
             $url = "{$global['webSiteRootURL']}videos/favicon.ico";
@@ -230,7 +232,24 @@ class Configuration {
                 $url = "{$global['webSiteRootURL']}view/img/favicon.png";
             }
         }
-        return $url . "?" . filectime($file);
+        return array('file'=>$file, 'url'=>$url);
+    }
+
+    function getFavicon($getPNG = false, $getTime = true) {
+        $return = self::_getFavicon($getPNG);
+        if($getTime){
+            return $return['url'] . "?" . filectime($return['file']);
+        }else{
+            return $return['url'];
+        }
+    }
+    
+    static function getOGImage(){
+        global $global;
+        $destination = "{$global['systemRootPath']}videos/cache/og_200X200.jpg";
+        $return = self::_getFavicon(true);
+        convertImageToOG($return['file'], $destination);
+        return $global['webSiteRootURL']."videos/cache/og_200X200.jpg";
     }
 
     function setHead($head) {
@@ -446,26 +465,31 @@ require_once \$global['systemRootPath'].'objects/include_config.php';
     }
 
     function getEncoderURL() {
-        global $advancedCustom;
-        if (!empty($advancedCustom->useEncoderNetworkRecomendation) && !empty($advancedCustom->encoderNetwork)) {
-            if (substr($advancedCustom->encoderNetwork, -1) !== '/') {
-                $advancedCustom->encoderNetwork .= "/";
+        $encoder = ObjectYPT::getCache("getEncoderURL", 60);
+        if(empty($encoder)){
+            global $advancedCustom;
+            if (!empty($advancedCustom->useEncoderNetworkRecomendation) && !empty($advancedCustom->encoderNetwork)) {
+                if (substr($advancedCustom->encoderNetwork, -1) !== '/') {
+                    $advancedCustom->encoderNetwork .= "/";
+                }
+                $bestEncoder = json_decode(url_get_contents($advancedCustom->encoderNetwork . "view/getBestEncoder.php", "", 10));
+                if (!empty($bestEncoder->siteURL)) {
+                    $this->encoderURL = $bestEncoder->siteURL;
+                }else{
+                    error_log("Configuration::getEncoderURL ERROR your network ($advancedCustom->encoderNetwork) is not configured properly This slow down your site a lot, disable the option useEncoderNetworkRecomendation in your CustomizeAdvanced plugin");
+                }
             }
-            $bestEncoder = json_decode(url_get_contents($advancedCustom->encoderNetwork . "view/getBestEncoder.php"));
-            if (!empty($bestEncoder->siteURL)) {
-                $this->encoderURL = $bestEncoder->siteURL;
-            }else{
-                error_log("Configuration::getEncoderURL ERROR your network ($advancedCustom->encoderNetwork) is not configured properly This slow down your site a lot, disable the option useEncoderNetworkRecomendation in your CustomizeAdvanced plugin");
-            }
-        }
 
-        if (empty($this->encoderURL)) {
-            return "https://encoder1.avideo.com/";
+            if (empty($this->encoderURL)) {
+                $encoder = "https://encoder1.avideo.com/";
+            }
+            if (substr($this->encoderURL, -1) !== '/') {
+                $this->encoderURL .= "/";
+            }
+            $encoder = $this->encoderURL;
+            ObjectYPT::setCache("getEncoderURL", $encoder);
         }
-        if (substr($this->encoderURL, -1) !== '/') {
-            $this->encoderURL .= "/";
-        }
-        return $this->encoderURL;
+        return $encoder;
     }
 
     function setEncoderURL($encoderURL) {

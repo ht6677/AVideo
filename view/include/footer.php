@@ -1,4 +1,4 @@
-<footer>
+<footer style="<?php echo $advancedCustom->footerStyle; ?> display: none;" id="mainFooter">
     <?php
     $custom = "";
     $extraPluginFile = $global['systemRootPath'] . 'plugin/Customize/Objects/ExtraConfig.php';
@@ -28,21 +28,24 @@
 <?php
 if (!empty($_GET['error'])) {
     ?>
-            swal({title: "Sorry!", text: "<?php echo $_GET['error']; ?>", icon: "error", html: true});
+            avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo $_GET['error']; ?>", "error");
+            window.history.pushState({}, document.title, '<?php echo getSelfURI(); ?>');
     <?php
 }
 ?>
 <?php
 if (!empty($_GET['msg'])) {
     ?>
-            swal({title: "Ops!", text: "<?php echo $_GET['msg']; ?>", icon: "info", html: true});
+            avideoAlert("<?php echo __("Ops!"); ?>", "<?php echo $_GET['msg']; ?>", "info");
+            window.history.pushState({}, document.title, '<?php echo getSelfURI(); ?>');
     <?php
 }
 ?>
 <?php
 if (!empty($_GET['success']) && strlen($_GET['success']) > 4) {
     ?>
-            swal({title: "<?php echo __("Congratulations"); ?>", text: "<?php echo $_GET['success']; ?>", icon: "success", html: true});
+            avideoAlert("<?php echo __("Congratulations!"); ?>", "<?php echo $_GET['success']; ?>", "info");
+            window.history.pushState({}, document.title, '<?php echo getSelfURI(); ?>');
     <?php
 }
 ?>
@@ -64,10 +67,12 @@ $jsFiles[] = "view/js/bootpag/jquery.bootpag.min.js";
 $jsFiles[] = "view/js/bootgrid/jquery.bootgrid.js";
 $jsFiles[] = "view/bootstrap/bootstrapSelectPicker/js/bootstrap-select.min.js";
 //$jsFiles[] = "view/js/bootstrap-toggle/bootstrap-toggle.min.js";
-$jsFiles[] = "view/js/js-cookie/js.cookie.js";
+$jsFiles[] = "view/js/jquery.bootstrap-autohidingnavbar.min.js";
 $jsFiles[] = "view/css/flagstrap/js/jquery.flagstrap.min.js";
 $jsFiles[] = "view/js/webui-popover/jquery.webui-popover.min.js";
 $jsFiles[] = "view/js/bootstrap-list-filter/bootstrap-list-filter.min.js";
+$jsFiles[] = "view/js/js-cookie/js.cookie.js";
+$jsFiles[] = "view/js/jquery-toast/jquery.toast.min.js";
 if (!empty($video['type'])) {
 
     $waveSurferEnabled = AVideoPlugin::getObjectDataIfEnabled("CustomizeAdvanced");
@@ -85,12 +90,11 @@ $jsFiles = array_merge($jsFiles, AVideoPlugin::getJSFiles());
 $jsURL = combineFiles($jsFiles, "js");
 ?>
 <script src="<?php echo $jsURL; ?>" type="text/javascript"></script>
-<?php
-require_once $global['systemRootPath'] . 'plugin/AVideoPlugin.php';
-?>
-<div id="pluginFooterCode">
+<div id="pluginFooterCode" >
     <?php
-    echo AVideoPlugin::getFooterCode();
+    if (!isForbidden()) {
+        echo AVideoPlugin::getFooterCode();
+    }
     ?>
 </div>
 <?php
@@ -111,3 +115,26 @@ if (!empty($advancedCustom->footerHTMLCode->value)) {
           top: 0;
           left: 0;
           pointer-events: none;"></textarea>
+<script>
+    var checkFooterTimout;
+    $(function () {
+        checkFooter();
+        
+        $(window).scroll(function () {
+            clearTimeout(checkFooterTimout);
+            checkFooterTimout = setTimeout(function () {
+                checkFooter();
+            }, 100);
+        });
+    });
+    function checkFooter() {
+        $("#mainFooter").fadeIn();
+        if ($(document).height() <= $(window).height()) {
+            clearTimeout(checkFooterTimout);
+            checkFooterTimout = setTimeout(function(){ checkFooter(); },1000);
+            $("#mainFooter").css("position", "fixed");
+        } else {
+            $("#mainFooter").css("position", "relative");
+        }
+    }
+</script>

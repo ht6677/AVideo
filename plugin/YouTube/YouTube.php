@@ -4,6 +4,11 @@ require_once $global['systemRootPath'] . 'plugin/Plugin.abstract.php';
 require_once $global['systemRootPath'] . 'plugin/AVideoPlugin.php';
 class YouTube extends PluginAbstract {
 
+    public function getTags() {
+        return array(
+            PluginTags::$DEPRECATED,
+        );
+    }
     public function getDescription() {
         return "<b>(Deprecated, will be removed in next version)</b> Make the first page works as a YouTube";
     }
@@ -24,7 +29,7 @@ class YouTube extends PluginAbstract {
         global $global, $sidebarStyle;
         $obj = $this->getDataObject();
         // preload image
-        $js = "<script>var img1 = new Image();img1.src=\"{$global['webSiteRootURL']}view/img/video-placeholder.png\";</script>";
+        $js = "<script>var img1 = new Image();img1.src=\"{$global['webSiteRootURL']}view/img/video-placeholder-gray.png\";</script>";
         $css = '<link href="' . $global['webSiteRootURL'] . 'plugin/YouTube/style.css" rel="stylesheet" type="text/css"/>';
         if(!empty($obj->playVideoOnFullscreen) && !empty($_GET['videoName'])){
             $css .= '<link href="' . $global['webSiteRootURL'] . 'plugin/YouPHPFlix2/view/css/fullscreen.css" rel="stylesheet" type="text/css"/>';
@@ -85,10 +90,6 @@ class YouTube extends PluginAbstract {
         global $global;
         return $global['systemRootPath'].'plugin/YouTube/view/modeYouTube.php';
     }   
-    
-    public function getTags() {
-        return array('free', 'firstPage', 'YouTube');
-    }
     
     public function getFooterCode() {
         $obj = $this->getDataObject();

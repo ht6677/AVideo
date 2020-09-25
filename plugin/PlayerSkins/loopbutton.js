@@ -7,9 +7,9 @@ $(document).ready(function () {
         constructor: function () {
             Button.apply(this, arguments);
             this.addClass('loop-button');
-            if (!isPlayerLoop()){
+            if (!isPlayerLoop()) {
                 this.addClass('loop-disabled-button');
-            }else{
+            } else {
                 this.addClass('fa-spin');
             }
             this.controlText("Loop");

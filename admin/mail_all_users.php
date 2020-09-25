@@ -5,11 +5,11 @@
 
         <div class="row">
             <label class="col-md-4">
-                Sent only to this email:
+                <?php echo __('Sent only to this email'); ?>:
             </label>
             <div class="col-md-8">
                 <input class="form-control" type="email" id="email" placeholder="test@email.com">
-                <small>Leave it blank to send to all users</small>
+                <small><?php echo __('Leave it blank to send to all users'); ?></small>
             </div>
         </div>
         <hr>
@@ -41,9 +41,9 @@
             success: function (response) {
                 console.log(response);
                 if (response.error) {
-                    swal("<?php echo __("Sorry!"); ?>", response.msg[0], "error");
+                    avideoAlert("<?php echo __("Sorry!"); ?>", response.msg[0], "error");
                 } else {
-                    swal("<?php echo __("Success"); ?>", "You have sent "+response.count+" emails", "success");
+                    avideoAlert("<?php echo __("Success"); ?>", "You have sent "+response.count+" emails", "success");
                 }
                 modal.hidePleaseWait();
             }

@@ -24,15 +24,16 @@ if (!empty($_GET['page'])) {
 $users_id_array = VideoStatistic::getUsersIDFromChannelsWithMoreViews();
 
 $current = $_POST['current'];
-$_POST['rowCount'] = 10;
+$_REQUEST['rowCount'] = 10;
 $channels = Channel::getChannels(true, "u.id, '". implode(",", $users_id_array)."'");
 
-$totalPages = ceil($totalChannels / $_POST['rowCount']);
+$totalPages = ceil($totalChannels / $_REQUEST['rowCount']);
+$metaDescription = __("Channels");
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $_SESSION['language']; ?>">
     <head>
-        <title><?php echo $config->getWebSiteTitle(); ?> :: <?php echo __("Channels"); ?></title>
+        <title><?php echo $config->getWebSiteTitle(); ?> :: <?php echo __("Channels").getSEOComplement(); ?></title>
         <?php
         include $global['systemRootPath'] . 'view/include/head.php';
         ?>
@@ -102,7 +103,7 @@ $totalPages = ceil($totalChannels / $_POST['rowCount']);
                         <div class="  bgWhite clear clearfix" style="margin: 10px 0;">
                             <div class="clear clearfix">
                                 <img src="<?php echo User::getPhoto($value['id']); ?>"
-                                     class="img img-thumbnail img-responsive pull-left" style="max-height: 100px; margin: 0 10px;" />
+                                     class="img img-thumbnail img-responsive pull-left" style="max-height: 100px; margin: 0 10px;" alt="User Photo" />
                                 <a href="<?php echo User::getChannelLink($value['id']); ?>" class="btn btn-default">
                                     <i class="fas fa-play-circle"></i>
                                     <?php
@@ -110,6 +111,9 @@ $totalPages = ceil($totalChannels / $_POST['rowCount']);
                                     ?>
                                 </a>
                                 <span class="pull-right">
+                                    <?php 
+                                    echo User::getBlockUserButton($value['id']);
+                                    ?>
                                     <?php echo Subscribe::getButton($value['id']); ?>
                                 </span>
                                 <div>
@@ -120,7 +124,7 @@ $totalPages = ceil($totalChannels / $_POST['rowCount']);
                                 <h2><?php echo __("Preview"); ?></h2>
                                 <?php
                                 $_POST['current'] = 1;
-                                $_POST['rowCount'] = 6;
+                                $_REQUEST['rowCount'] = 6;
                                 $_POST['sort']['created'] = "DESC";
                                 $uploadedVideos = Video::getAllVideosAsync("viewable", $value['id']);
                                 foreach ($uploadedVideos as $value2) {
@@ -138,13 +142,16 @@ $totalPages = ceil($totalChannels / $_POST['rowCount']);
                                 }
                                 ?>
                             </div>
+                            <div class="text-muted pull-right" style="font-size: 0.8em">
+                                <?php echo VideoStatistic::getChannelsTotalViews($value['id'])," ",__("Views in the last 30 days"); ?>
+                            </div>
                         </div>
                         <?php
                     }
+                    
+                    echo getPagination($totalPages, $current, "{$global['webSiteRootURL']}channels?page={page}");
+                               
                     ?>
-
-                    <ul class="pages">
-                    </ul>
                 </div>
             </div>
         </div>
@@ -152,16 +159,5 @@ $totalPages = ceil($totalChannels / $_POST['rowCount']);
         <?php
         include $global['systemRootPath'] . 'view/include/footer.php';
         ?>
-        <script>
-            $(function () {
-                $('.pages').bootpag({
-                    total: <?php echo $totalPages; ?>,
-                    page: <?php echo $current; ?>,
-                    maxVisible: 10
-                }).on('page', function (event, num) {
-                    document.location = "<?php echo $global['webSiteRootURL']; ?>channels?page=" + num;
-                });
-            });
-        </script>
     </body>
 </html>

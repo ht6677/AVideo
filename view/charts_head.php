@@ -17,7 +17,7 @@ if (!User::isLogged()) {
 }
 
 if (empty($_POST['rowCount'])) {
-    $_POST['rowCount'] = $limitVideos;
+    $_REQUEST['rowCount'] = $limitVideos;
 }
 $times = array();
 $start = microtime(true);
@@ -86,7 +86,7 @@ if ($config->getAuthCanViewChart() == 0) {
         $times[__LINE__] = microtime(true) - $start;
         $start = microtime(true);
     } else {
-        die("403 - You have no access here!");
+        forbiddenPage("You have no access here!");
     }
 }
 $labelToday = array();

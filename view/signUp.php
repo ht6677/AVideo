@@ -13,6 +13,11 @@ if (!empty($advancedCustomUser->disableNativeSignUp)) {
 }
 
 $agreement = AVideoPlugin::loadPluginIfEnabled("SignUpAgreement");
+
+$signInLink = "{$global['webSiteRootURL']}user?redirectUri=".urlencode(isset($_GET['redirectUri']) ? $_GET['redirectUri'] : "");
+if(!empty($_GET['siteRedirectUri'])){
+    $signInLink = $_GET['siteRedirectUri'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $_SESSION['language']; ?>">
@@ -78,20 +83,18 @@ $agreement = AVideoPlugin::loadPluginIfEnabled("SignUpAgreement");
                             <div class="form-group">
                                 <label class="col-sm-4 control-label hidden-xs"><?php echo __("New Password"); ?></label>
                                 <div class="col-sm-8 inputGroupContainer">
-                                    <div class="input-group">
-                                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-                                        <input  id="inputPassword" placeholder="<?php echo __("New Password"); ?>" class="form-control"  type="password" value=""  autocomplete="off" >
-                                    </div>
+                                    <?php
+                                    getInputPassword("inputPassword", 'class="form-control" autocomplete="off" ', __("New Password"));
+                                    ?>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="col-sm-4 control-label hidden-xs"><?php echo __("Confirm New Password"); ?></label>
                                 <div class="col-sm-8 inputGroupContainer">
-                                    <div class="input-group">
-                                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-                                        <input  id="inputPasswordConfirm" placeholder="<?php echo __("Confirm New Password"); ?>" class="form-control"  type="password" value="" >
-                                    </div>
+                                    <?php
+                                    getInputPassword("inputPasswordConfirm", 'class="form-control" autocomplete="off" ', __("Confirm New Password"));
+                                    ?>
                                 </div>
                             </div>
 
@@ -121,7 +124,7 @@ $agreement = AVideoPlugin::loadPluginIfEnabled("SignUpAgreement");
                             </div>
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    <a href="<?php echo $global['webSiteRootURL']; ?>user?redirectUri=<?php echo urlencode(isset($_GET['redirectUri']) ? $_GET['redirectUri'] : ""); ?>" class="btn btn-success btn-block" ><i class="fas fa-sign-in-alt"></i> <?php echo __("Sign In"); ?></a>
+                                    <a href="<?php echo $signInLink; ?>" class="btn btn-success btn-block" ><i class="fas fa-sign-in-alt"></i> <?php echo __("Sign In"); ?></a>
                                 </div>
                             </div>
                         </fieldset>
@@ -144,7 +147,7 @@ $agreement = AVideoPlugin::loadPluginIfEnabled("SignUpAgreement");
                         // password dont match
                         if (pass1 != '' && pass1 != pass2) {
                             modal.hidePleaseWait();
-                            swal("<?php echo __("Sorry!"); ?>", "<?php echo __("Your password does not match!"); ?>", "error");
+                            avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo __("Your password does not match!"); ?>", "error");
                             return false;
                         } else {
                             $.ajax({
@@ -182,9 +185,9 @@ $agreement = AVideoPlugin::loadPluginIfEnabled("SignUpAgreement");
 
                                     } else {
                                         if (response.error) {
-                                            swal("<?php echo __("Sorry!"); ?>", response.error, "error");
+                                            avideoAlert("<?php echo __("Sorry!"); ?>", response.error, "error");
                                         } else {
-                                            swal("<?php echo __("Sorry!"); ?>", "<?php echo __("Your user has NOT been created!"); ?>", "error");
+                                            avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo __("Your user has NOT been created!"); ?>", "error");
                                         }
                                     }
                                     modal.hidePleaseWait();

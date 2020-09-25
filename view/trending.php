@@ -25,9 +25,9 @@ $total = Video::getTotalVideos();
 
 if (empty($_POST['rowCount'])) {
     if (!empty($_GET['rowCount'])) {
-        $_POST['rowCount'] = $_GET['rowCount'];
+        $_REQUEST['rowCount'] = $_GET['rowCount'];
     } else {
-        $_POST['rowCount'] = 5;
+        $_REQUEST['rowCount'] = 5;
     }
 }
 
@@ -38,15 +38,18 @@ if (empty($_POST['current'])) {
         $_POST['current'] = 1;
     }
 }
-$_POST['sort']['likes'] = "DESC";
+//$_POST['sort']['likes'] = "DESC";
+$_GET['sort']['trending'] = 1;
+
 $pages = ceil($total / $_POST['rowCount']);
 $videos = Video::getAllVideos();
 unset($_POST['sort']);
+$metaDescription = __("Trending");
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $_SESSION['language']; ?>">
     <head>
-        <title><?php echo $config->getWebSiteTitle(); ?> <?php echo __("Trending"); ?></title>
+        <title><?php echo $config->getWebSiteTitle(); ?> <?php echo __("Trending").getSEOComplement(); ?></title>
         <?php include $global['systemRootPath'] . 'view/include/head.php'; ?>
         <link href="<?php echo $global['webSiteRootURL']; ?>plugin/Gallery/style.css" rel="stylesheet" type="text/css"/>
     </head>
@@ -129,7 +132,7 @@ unset($_POST['sort']);
                                 </div>
                                 <div>
                                     <i class="fa fa-user"></i>
-                                    <a class="text-muted" href="<?php echo User::getChannelLink($value['users_id']); ?>/">
+                                    <a class="text-muted" href="<?php echo User::getChannelLink($value['users_id']); ?>">
                                         <?php echo User::getNameIdentificationById($value['users_id']); ?>
                                     </a>
                                     <?php if ((!empty($value['description'])) && !empty($obj->Description)) { ?>

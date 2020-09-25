@@ -4,17 +4,24 @@ require_once $global['systemRootPath'] . 'plugin/Plugin.abstract.php';
 require_once $global['systemRootPath'] . 'plugin/AVideoPlugin.php';
 
 class PlayerSkins extends PluginAbstract {
-
+    
+    public function getTags() {
+        return array(
+            PluginTags::$FREE,
+            PluginTags::$PLAYER,
+            PluginTags::$LAYOUT,
+        );
+    }
     public function getDescription() {
         global $global;
         $desc = "Customize your playes Skin<br>The Skis options are: ";
-        $dir = $global['systemRootPath'].'plugin/PlayerSkins/skins/';
+        $dir = $global['systemRootPath'] . 'plugin/PlayerSkins/skins/';
         $names = array();
         foreach (glob($dir . '*.css') as $file) {
             $path_parts = pathinfo($file);
             $names[] = $path_parts['filename'];
         }
-        return $desc."<code>".implode($names,"</code> or <code>")."</code>";
+        return $desc . "<code>" . implode("</code> or <code>", $names) . "</code>";
     }
 
     public function getName() {
@@ -42,6 +49,13 @@ class PlayerSkins extends PluginAbstract {
         $obj->showLogoAdjustScale = "0.4";
         $obj->showLogoAdjustLeft = "-74px";
         $obj->showLogoAdjustTop = "-22px;";
+        $obj->disableEmbedTopInfo = false;
+        $obj->contextMenuDisableEmbedOnly = false;
+        $obj->contextMenuLoop = true;
+        $obj->contextMenuCopyVideoURL = true;
+        $obj->contextMenuCopyVideoURLCurrentTime = true;
+        $obj->contextMenuCopyEmbedCode = true;
+        $obj->contextMenuShare = true;
         return $obj;
     }
 
@@ -49,13 +63,20 @@ class PlayerSkins extends PluginAbstract {
         global $global, $config;
         $obj = $this->getDataObject();
         $css = "";
-        if (!empty($_GET['videoName']) || !empty($_GET['u'])  || !empty($_GET['evideo']) || !empty($_GET['playlists_id'])) {
+        $js = "";
+        if (isVideo() || !empty($_GET['videoName']) || !empty($_GET['u']) || !empty($_GET['evideo']) || !empty($_GET['playlists_id'])) {
+            if(self::isAutoplayEnabled()){
+                $js .= "<script>var autoplay = true;</script>";
+            }else{
+                $js .= "<script>var autoplay = false;</script>";
+            }
             $css .= "<link href=\"{$global['webSiteRootURL']}plugin/PlayerSkins/skins/{$obj->skin}.css\" rel=\"stylesheet\" type=\"text/css\"/>";
             if ($obj->showLoopButton && !isLive()) {
                 $css .= "<link href=\"{$global['webSiteRootURL']}plugin/PlayerSkins/loopbutton.css\" rel=\"stylesheet\" type=\"text/css\"/>";
             }
-            if($obj->showLogoOnEmbed && isEmbed() || $obj->showLogo ){
-                $logo = "{$global['webSiteRootURL']}".$config->getLogo(true);
+            $css .= "<link href=\"{$global['webSiteRootURL']}plugin/PlayerSkins/player.css\" rel=\"stylesheet\" type=\"text/css\"/>";
+            if ($obj->showLogoOnEmbed && isEmbed() || $obj->showLogo) {
+                $logo = "{$global['webSiteRootURL']}" . $config->getLogo(true);
                 $css .= "<style>"
                         . ".player-logo{
   outline: none;
@@ -82,37 +103,37 @@ class PlayerSkins extends PluginAbstract {
         return $css;
     }
 
-    
     public function getFooterCode() {
-        global $global, $config;
+        global $global, $config, $getStartPlayerJSWasRequested;
         $js = "";
         $obj = $this->getDataObject();
-        if (!empty($_GET['videoName']) || !empty($_GET['u'])  || !empty($_GET['evideo']) || !empty($_GET['playlists_id'])) {
+        if (!empty($_GET['videoName']) || !empty($_GET['u']) || !empty($_GET['evideo']) || !empty($_GET['playlists_id'])) {
             if ($obj->showLoopButton && !isLive()) {
                 $js .= "<script src=\"{$global['webSiteRootURL']}plugin/PlayerSkins/loopbutton.js\"></script>";
+            }else if(empty($obj->showLoopButton) && empty ($playerSkinsObj->contextMenuLoop)){
+                $js .= "<script>setPlayerLoop(false);</script>";
             }
-            if($obj->showLogoOnEmbed && isEmbed() || $obj->showLogo ){
+            if ($obj->showLogoOnEmbed && isEmbed() || $obj->showLogo) {
                 $title = $config->getWebSiteTitle();
                 $url = "{$global['webSiteRootURL']}{$config->getLogo(true)}";
                 $js .= "<script>var PlayerSkinLogoTitle = '{$title}';</script>";
                 $js .= "<script src=\"{$global['webSiteRootURL']}plugin/PlayerSkins/logo.js\"></script>";
             }
         }
-        
+        if(!empty($getStartPlayerJSWasRequested) || isVideo()){
+            $js .= "<script src=\"{$global['webSiteRootURL']}view/js/videojs-persistvolume/videojs.persistvolume.js\"></script>";
+        }
         return $js;
     }
-    
-    public function getTags() {
-        return array('free');
-    }
 
-    static function getDataSetup($str = ""){
+    static function getDataSetup($str = "") {
         global $video, $disableYoutubeIntegration, $global;
         $obj = AVideoPlugin::getObjectData('PlayerSkins');
-        
+
         $dataSetup = array();
-        
-        if(!isLive() && !empty($obj->playbackRates)){
+
+        $dataSetup[] = "errorDisplay: false";
+        if (!isLive() && !empty($obj->playbackRates)) {
             $dataSetup[] = "'playbackRates':{$obj->playbackRates}";
         }
         if (!isLive() && (isset($_GET['isEmbedded'])) && ($disableYoutubeIntegration == false) && !empty($video['videoLink'])) {
@@ -126,17 +147,60 @@ class PlayerSkins extends PluginAbstract {
                 $dataSetup[] = "vimeo:{customVars: {wmode: \"transparent\", origin: \"{$global['webSiteRootURL']}\"}}";
             }
         }
-        
+
         $pluginsDataSetup = AVideoPlugin::dataSetup();
-        if(!empty($pluginsDataSetup)){
+        if (!empty($pluginsDataSetup)) {
             $dataSetup[] = $pluginsDataSetup;
         }
-        if(!empty($dataSetup)){
-            return ",{". implode(",", $dataSetup)."{$str}{$obj->playerCustomDataSetup}}";
+        if (!empty($dataSetup)) {
+            return ",{" . implode(",", $dataSetup) . "{$str}{$obj->playerCustomDataSetup}}";
         }
-        
+
         return "";
     }
+
+    static function getStartPlayerJS($onPlayerReady = "", $getDataSetup="", $noReadyFunction = false) {
+        global $global, $config, $getStartPlayerJSWasRequested;
+        $js = "";
+        if(empty($noReadyFunction)){
+            $js .= "$(document).ready(function () {";
+        }
+        $js .= "
+        if (typeof player === 'undefined') {
+            player = videojs('mainVideo'" . (self::getDataSetup($getDataSetup)) . ");
+        }
+        player.ready(function () {
+            var err = this.error();
+            if (err && err.code) {
+                $('.vjs-error-display').hide();
+                $('#mainVideo').find('.vjs-poster').css({'background-image': 'url({$global['webSiteRootURL']}plugin/Live/view/Offline.jpg)'});
+            }
+            {$onPlayerReady}
+        });
+        player.persistvolume({
+            namespace: 'AVideo'
+        });";
+        if ($config->getAutoplay()) {
+            $js .= "setTimeout(function(){playerPlay(0);},500);";
+        }
+        
+        if(empty($noReadyFunction)){
+            $js .= "});";
+        }
+        $getStartPlayerJSWasRequested = true;
+        return $js;
+    }
     
-    
+    static function isAutoplayEnabled(){
+        global $config;
+        if(!empty($_COOKIE['autoplay'])){
+            if(strtolower($_COOKIE['autoplay']) === 'false'){
+                return false;
+            }else{
+                return true;
+            }
+        }
+        return $config->getAutoplay();
+    }
+
 }

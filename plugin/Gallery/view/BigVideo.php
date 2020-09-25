@@ -7,6 +7,8 @@ if ($obj->BigVideo && empty($_GET['showOnly'])) {
     if (!empty($obj->useSuggestedVideosAsCarouselInBigVideo)) {
         //getAllVideos($status = "viewable", $showOnlyLoggedUserVideos = false, $ignoreGroup = false, $videosArrayId = array(), $getStatistcs = false, $showUnlisted = false, $activeUsersOnly = true)
         //$videoRows = Video::getAllVideosLight("viewable", !$obj->hidePrivateVideos, false, true);
+        $_REQUEST['rowCount'] = 20;
+        $_REQUEST['current'] = 1;
         $videoRows = Video::getAllVideos("viewable", false, !$obj->hidePrivateVideos, array(), false, false, true, true);
     }
     if (empty($videoRows)) {
@@ -67,7 +69,7 @@ if ($obj->BigVideo && empty($_GET['showOnly'])) {
                                     <?php
                                     $images = Video::getImageFromFilename($videoRow['filename'], $videoRow['type']);
                                     $imgGif = $images->thumbsGif;
-                                    $poster = $images->poster;
+                                    $poster = isMobile()?$images->thumbsJpg:$images->poster;
                                     ?>
                                     <div class="aspectRatio16_9">
                                         <img src="<?php echo $images->thumbsJpgSmall; ?>" data-src="<?php echo $poster; ?>" alt="<?php echo $videoRow['title']; ?>" class="thumbsJPG img img-responsive <?php echo ($poster != $images->thumbsJpgSmall) ? "blur" : ""; ?>" style="height: auto; width: 100%;" id="thumbsJPG<?php echo $videoRow['id']; ?>" />
@@ -134,7 +136,7 @@ if ($obj->BigVideo && empty($_GET['showOnly'])) {
                                     <div class="text-muted galeryDetails">
                                         <div>
                                             <?php if (empty($_GET['catName'])) { ?>
-                                                <a class="label label-default" href="<?php echo Video::getLink($videoRow['id'], $videoRow['clean_title'], false, $get); ?>/">
+                                                <a class="label label-default" href="<?php echo Video::getLink($videoRow['id'], $videoRow['clean_title'], false, $get); ?>">
                                                     <?php
                                                     if (!empty($videoRow['iconClass'])) {
                                                         ?>

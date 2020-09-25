@@ -59,7 +59,7 @@ if (User::isAdmin()) {
                                         <div class="row">
                                             <div class="col-xs-4">
                                                 <div class="panel panel-success">
-                                                    <div class="panel-heading">Customize Your site colors <div class="pull-right"><?php echo getPluginSwitch('Customize'); ?></div></div>
+                                                    <div class="panel-heading"><?php echo __('Customize Your site colors'); ?> <div class="pull-right"><?php echo getPluginSwitch('Customize'); ?></div></div>
                                                     <div class="panel-body">
                                                         <img src="<?php echo $global['webSiteRootURL'], "view/css/custom/customize.png"; ?>" class="img-responsive">
                                                         <?php
@@ -310,7 +310,7 @@ if (User::isAdmin()) {
                                                     <label class="col-md-4 control-label"><?php echo __("Authenticated users can upload videos"); ?></label>
                                                     <div class="col-md-8 inputGroupContainer">
                                                         <div class="input-group">
-                                                            <span class="input-group-addon"><i class="fa fa-cloud-upload"></i></span>
+                                                            <span class="input-group-addon"><i class="fas fa-cloud-upload-alt"></i></span>
                                                             <select class="form-control" id="authCanUploadVideos" >
                                                                 <option value="1" <?php echo ($config->getAuthCanUploadVideos() == 1) ? "selected" : ""; ?>><?php echo __("Yes"); ?></option>
                                                                 <option value="0" <?php echo ($config->getAuthCanUploadVideos() == 0) ? "selected" : ""; ?>><?php echo __("No"); ?></option>
@@ -323,7 +323,7 @@ if (User::isAdmin()) {
                                                     <label class="col-md-4 control-label"><?php echo __("Authenticated users can view chart"); ?></label>
                                                     <div class="col-md-8 inputGroupContainer">
                                                         <div class="input-group">
-                                                            <span class="input-group-addon"><i class="fa fa-cloud-upload"></i></span>
+                                                            <span class="input-group-addon"><i class="fas fa-chart-bar"></i></span>
                                                             <select class="form-control" id="authCanViewChart" >
                                                                 <option value="0" <?php echo ($config->getAuthCanViewChart() == 0) ? "selected" : ""; ?>><?php echo __("For uploaders"); ?></option>
                                                                 <option value="1" <?php echo ($config->getAuthCanViewChart() == 1) ? "selected" : ""; ?>><?php echo __("For selected, admin view"); ?></option>
@@ -336,7 +336,7 @@ if (User::isAdmin()) {
                                                     <label class="col-md-4 control-label"><?php echo __("Authenticated users can comment videos"); ?></label>
                                                     <div class="col-md-8 inputGroupContainer">
                                                         <div class="input-group">
-                                                            <span class="input-group-addon"><i class="fa fa-commenting"></i></span>
+                                                            <span class="input-group-addon"><i class="fas fa-comments"></i></span>
 
                                                             <select class="form-control" id="authCanComment"  >
                                                                 <option value="1" <?php echo ($config->getAuthCanComment() == 1) ? "selected" : ""; ?>><?php echo __("Yes"); ?></option>
@@ -514,8 +514,8 @@ if (User::isAdmin()) {
                                                     <div class="alert alert-warning">
                                                         <h3>
                                                             <i class="fas fa-info-circle"></i>
-                                                            If you are not sure how to configure your email, 
-                                                            please try <a href="https://github.com/WWBN/AVideo/wiki/Setting-up-AVideo-Platform-to-send-emails" target="_blank" rel="noopener noreferrer" >this help</a>
+                                                            <?php echo __('If you are not sure how to configure your email'); ?>, 
+                                                            <?php echo __('please try'); ?> <a href="https://github.com/WWBN/AVideo/wiki/Setting-up-AVideo-Platform-to-send-emails" target="_blank" rel="noopener noreferrer" ><?php echo __('this help'); ?></a>
                                                         </h3>
                                                     </div>
 
@@ -550,7 +550,7 @@ if (User::isAdmin()) {
                                                     <div class="form-group">
                                                         <label class="col-md-4 control-label"><?php echo __("SMTP Secure"); ?></label>
                                                         <div class="col-md-8">
-                                                            <input id="smtpSecure" class="form-control"  type="text" value="<?php echo $config->getSmtpSecure(); ?>" placeholder="tls OR ssl" aria-describedby="smtpSecureHelp"    >
+                                                            <input id="smtpSecure" class="form-control"  type="text" value="<?php echo $config->getSmtpSecure(); ?>" placeholder="<?php echo __('tls OR ssl'); ?>" aria-describedby="smtpSecureHelp"    >
                                                             <small id="smtpSecureHelp" class="form-text text-muted"><?php echo __("Use tls OR ssl"); ?></small>
                                                         </div>
                                                     </div>
@@ -558,7 +558,7 @@ if (User::isAdmin()) {
                                                     <div class="form-group">
                                                         <label class="col-md-4 control-label"><?php echo __("SMTP Port"); ?></label>
                                                         <div class="col-md-8">
-                                                            <input id="smtpPort" class="form-control"  type="number" value="<?php echo $config->getSmtpPort(); ?>" placeholder="465 OR 587" aria-describedby="smtpPortHelp"    >
+                                                            <input id="smtpPort" class="form-control"  type="number" value="<?php echo $config->getSmtpPort(); ?>" placeholder="<?php echo __('465 OR 587'); ?>" aria-describedby="smtpPortHelp"    >
                                                             <small id="smtpPortHelp" class="form-text text-muted"><?php echo __("465 OR 587"); ?></small>
                                                         </div>
                                                     </div>
@@ -580,7 +580,9 @@ if (User::isAdmin()) {
                                                     <div class="form-group">
                                                         <label class="col-md-4 control-label"><?php echo __("SMTP Password"); ?></label>
                                                         <div class="col-md-8">
-                                                            <input id="smtpPassword" class="form-control"  type="password" value="<?php echo $config->getSmtpPassword(); ?>" >
+                                                            <?php
+                                                            getInputPassword("smtpPassword", 'class="form-control" value="'.$config->getSmtpPassword().'"', __("SMTP Password"));
+                                                            ?>
                                                         </div>
                                                     </div>
                                                     <div class="form-group">
@@ -609,8 +611,8 @@ if (User::isAdmin()) {
                                     <label class="col-md-2 control-label"><?php echo __("Head Code"); ?></label>
                                     <div class="col-md-10">
                                         <textarea id="head" class="form-control" type="text" rows="20" ><?php echo $config->getHead(); ?></textarea>
-                                        <small>For Google Analytics code: <a href='https://analytics.google.com'  target="_blank" rel="noopener noreferrer">https://analytics.google.com</a></small><br>
-                                        <small>Leave blank for native code</small>
+                                        <small><?php echo __('For Google Analytics code'); ?>: <a href='https://analytics.google.com'  target="_blank" rel="noopener noreferrer">https://analytics.google.com</a></small><br>
+                                        <small><?php echo __('Leave blank for native code'); ?></small>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -618,7 +620,7 @@ if (User::isAdmin()) {
                                     <div class="col-md-10">
                                         <input type="hidden" value="" id="adsense"/>
                                         <div class="alert alert-info">
-                                            Google AD Sense and any other Ads provider are moved to the <a href='<?php echo $global['webSiteRootURL']; ?>plugins'>ADs plugin </a>
+                                            <?php echo __('Google AD Sense and any other Ads provider are moved to the'); ?> <a href='<?php echo $global['webSiteRootURL']; ?>plugins'><?php echo __('ADs plugin'); ?> </a>
                                         </div>
                                     </div>
                                 </div>
@@ -654,7 +656,7 @@ if (User::isAdmin()) {
 
                 reader.readAsDataURL($(input)[0].files[0]);
             } else {
-                swal("Sorry - you're browser doesn't support the FileReader API");
+                avideoAlert("Sorry - you're browser doesn't support the FileReader API");
             }
         }
 
@@ -684,12 +686,12 @@ if (User::isAdmin()) {
                     success: function (response) {
                         modal.hidePleaseWait();
                         if (!response.error) {
-                            swal("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your message has been sent!"); ?>", "success");
+                            avideoAlert("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your message has been sent!"); ?>", "success");
 
                             $("#contact_form").hide();
                             $("#messageSuccess").fadeIn();
                         } else {
-                            swal("<?php echo __("Your message could not be sent!"); ?>", response.error, "error");
+                            avideoAlert("<?php echo __("Your message could not be sent!"); ?>", response.error, "error");
                         }
                         $('#btnReloadCapcha').trigger('click');
                     }
@@ -819,9 +821,9 @@ if (User::isAdmin()) {
                             type: 'post',
                             success: function (response) {
                                 if (response.status === "1") {
-                                    swal("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your configurations has been updated!"); ?>", "success");
+                                    avideoAlert("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your configurations has been updated!"); ?>", "success");
                                 } else {
-                                    swal("<?php echo __("Sorry!"); ?>", "<?php echo __("Your configurations has NOT been updated!"); ?>", "error");
+                                    avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo __("Your configurations has NOT been updated!"); ?>", "error");
                                 }
                                 modal.hidePleaseWait();
                             }

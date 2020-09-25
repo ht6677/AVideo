@@ -110,7 +110,7 @@ $playListsObj = AVideoPlugin::getObjectData("PlayLists");
                             <a href="<?php echo $link; ?>" class="btn btn-xs btn-default playAll hrefLink" ><span class="fa fa-play"></span> <?php echo __("Play All"); ?></a><?php echo $playListButtons; ?>
                             <?php
                             $liveLink = PlayLists::getLiveLink($program['id']);
-                            if(false && !empty($liveLink)){
+                            if(!empty($liveLink)){
                                 ?>
                                 <a href="<?php echo $liveLink; ?>" class="btn btn-xs btn-default playAll hrefLink" ><i class="fas fa-broadcast-tower"></i> <?php echo __("Play Live"); ?></a>
                                 <?php
@@ -238,7 +238,7 @@ $playListsObj = AVideoPlugin::getObjectData("PlayLists");
                                     <li class="col-lg-2 col-md-4 col-sm-4 col-xs-6 galleryVideo showMoreLess <?php echo $class; ?> " id="<?php echo $value['id']; ?>" style="padding: 1px;  <?php echo $style; ?>">
                                         <div class="panel panel-default" playListId="<?php echo $program['id']; ?>" style="min-height: 215px;">
                                             <div class="panel-body" style="overflow: hidden;">
-                                                <a class="aspectRatio16_9" href="<?php echo $episodeLink; ?>" title="<?php echo $value['title']; ?>" style="margin: 3px 0; overflow: visible;" >
+                                                <a class="aspectRatio16_9" href="<?php echo $episodeLink; ?>" title="<?php echo $value['title']; ?>" style="margin: 15px 0; overflow: visible;" >
                                                     <img src="<?php echo $poster; ?>" alt="<?php echo $value['title']; ?>" class="img img-responsive <?php echo $img_portrait; ?>  rotate<?php echo $value['rotation']; ?>" />
                                                     <?php
                                                     if ($value['type'] !== 'pdf' && $value['type'] !== 'article' && $value['type'] !== 'serie') {
@@ -259,6 +259,9 @@ $playListsObj = AVideoPlugin::getObjectData("PlayLists");
                                                         <?php
                                                         $value['tags'] = Video::getTags($value['id']);
                                                         foreach ($value['tags'] as $value2) {
+                                                            if(is_array($value2)){
+                                                                $value2 = (object)$value2;
+                                                            }
                                                             if ($value2->label === __("Group")) {
                                                                 ?>
                                                                 <span class="label label-<?php echo $value2->type; ?>"><?php echo $value2->text; ?></span>

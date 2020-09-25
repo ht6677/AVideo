@@ -61,9 +61,9 @@
                             url: "<?php echo $global['webSiteRootURL'] ?>objects/userVerifyEmail.php?users_id=<?php echo $user->getBdId(); ?>"
                                         }).done(function (response) {
                                             if (response.error) {
-                                                swal("<?php echo __("Sorry!"); ?>", response.msg, "error");
+                                                avideoAlert("<?php echo __("Sorry!"); ?>", response.msg, "error");
                                             } else {
-                                                swal("<?php echo __("Congratulations!"); ?>", "<?php echo __("Verification Sent"); ?>", "success");
+                                                avideoAlert("<?php echo __("Congratulations!"); ?>", "<?php echo __("Verification Sent"); ?>", "success");
                                             }
                                             modal.hidePleaseWait();
                                         });
@@ -80,20 +80,18 @@
 <div class="form-group">
     <label class="col-md-4 control-label"><?php echo __("New Password"); ?></label>
     <div class="col-md-8 inputGroupContainer">
-        <div class="input-group">
-            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-            <input  id="inputPassword" placeholder="<?php echo __("New Password"); ?>" class="form-control"  type="password" value="" autocomplete="off" >
-        </div>
+        <?php
+        getInputPassword("inputPassword", 'class="form-control"  autocomplete="off"', __("New Password"));
+        ?>
     </div>
 </div>
 
 <div class="form-group">
     <label class="col-md-4 control-label"><?php echo __("Confirm New Password"); ?></label>
     <div class="col-md-8 inputGroupContainer">
-        <div class="input-group">
-            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-            <input  id="inputPasswordConfirm" placeholder="<?php echo __("Confirm New Password"); ?>" class="form-control"  type="password" value="" autocomplete="off" >
-        </div>
+        <?php
+        getInputPassword("inputPasswordConfirm", 'class="form-control"  autocomplete="off"', __("Confirm New Password"));
+        ?>
     </div>
 </div>
 
@@ -200,7 +198,6 @@ AVideoPlugin::getMyAccount(User::getId());
 
 <script>
     var uploadCrop;
-
     function isAnalytics() {
         return true;
         str = $('#analyticsCode').val();
@@ -224,14 +221,14 @@ AVideoPlugin::getMyAccount(User::getId());
 
             reader.readAsDataURL($(input)[0].files[0]);
         } else {
-            swal("Sorry - you're browser doesn't support the FileReader API");
+            avideoAlert("Sorry - you're browser doesn't support the FileReader API");
         }
     }
 
     function updateUserFormSubmit() {
 
         $.ajax({
-            url: '<?php echo $global['webSiteRootURL']; ?>objects/userUpdate.json.php',
+            url: '<?php echo $global['webSiteRootURL']; ?>objects/userUpdate.json.php?do_not_login=1',
             data: {
                 "user": $('#inputUser').val(),
                 "pass": $('#inputPassword').val(),
@@ -266,10 +263,10 @@ AVideoPlugin::getMyAccount(User::getId());
                         });
                     });
                 } else if (response.error) {
-                    swal("<?php echo __("Sorry!"); ?>", response.error, "error");
+                    avideoAlert("<?php echo __("Sorry!"); ?>", response.error, "error");
                     modal.hidePleaseWait();
                 } else {
-                    swal("<?php echo __("Sorry!"); ?>", "<?php echo __("Your user has NOT been updated!"); ?>", "error");
+                    avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo __("Your user has NOT been updated!"); ?>", "error");
                     modal.hidePleaseWait();
                 }
             }
@@ -333,7 +330,7 @@ if (!empty($advancedCustomUser->forceLoginToBeTheEmail)) {
         $('#updateUserForm').submit(function (evt) {
             evt.preventDefault();
             if (!isAnalytics()) {
-                swal("<?php echo __("Sorry!"); ?>", "<?php echo __("Your analytics code is wrong"); ?>", "error");
+                avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo __("Your analytics code is wrong"); ?>", "error");
                 $('#inputAnalyticsCode').focus();
                 return false;
             }
@@ -344,7 +341,7 @@ if (!empty($advancedCustomUser->forceLoginToBeTheEmail)) {
             // password dont match
             if (pass1 != '' && pass1 != pass2) {
                 modal.hidePleaseWait();
-                swal("<?php echo __("Sorry!"); ?>", "<?php echo __("Your password does not match!"); ?>", "error");
+                avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo __("Your password does not match!"); ?>", "error");
                 return false;
             } else {
                 setTimeout(function () {

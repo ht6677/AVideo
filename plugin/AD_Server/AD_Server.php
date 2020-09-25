@@ -11,6 +11,14 @@ require_once $global['systemRootPath'] . 'plugin/Plugin.abstract.php';
 require_once $global['systemRootPath'] . 'plugin/AD_Server/Objects/VastCampaigns.php';
 
 class AD_Server extends PluginAbstract {
+    public function getTags() {
+        return array(
+            PluginTags::$MONETIZATION,
+            PluginTags::$ADS,
+            PluginTags::$FREE,
+            PluginTags::$PLAYER,
+        );
+    }
 
     public function getDescription() {
         return "VAST Ad Server<br><small><a href='https://github.com/WWBN/AVideo/wiki/Ad-Server-Plugin' target='__blank'><i class='fas fa-question-circle'></i> Help</a></small>";
@@ -153,6 +161,9 @@ class AD_Server extends PluginAbstract {
         }
         $obj = $this->getDataObject();
         $oldId = session_id();
+        if (session_status() !== PHP_SESSION_NONE) {
+            session_write_close();
+        }
         session_id($_GET['vmap_id']);
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -191,6 +202,9 @@ class AD_Server extends PluginAbstract {
             $_SESSION['adRandomPositions'] = $selectedOptions;
         }
         $adRandomPositions = $_SESSION['adRandomPositions'];
+        if (session_status() !== PHP_SESSION_NONE) {
+            session_write_close();
+        }
         session_id($oldId);
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -336,7 +350,11 @@ class VAST {
     function __construct($id) {
         $this->id = $id;
         $row = AD_Server::getRandomVideo();
-        $this->campaing = $row['id'];
+        if(!empty($row)){
+            $this->campaing = $row['id'];
+        }else{
+            $this->campaing = false;
+        }
     }
 
 }

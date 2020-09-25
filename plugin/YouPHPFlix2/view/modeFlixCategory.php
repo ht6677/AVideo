@@ -7,11 +7,11 @@ session_write_close();
 require_once $global['systemRootPath'] . 'objects/video.php';
 require_once $global['systemRootPath'] . 'objects/category.php';
 
-$_POST['rowCount'] = 2;
+$_REQUEST['rowCount'] = 2;
 if(empty($_GET['current'])){
-    $_POST['current'] = 1;
+    $_REQUEST['current'] = 1;
 }else{
-    $_POST['current'] = intval($_GET['current']);
+    $_REQUEST['current'] = intval($_GET['current']);
 }
 
 $obj = AVideoPlugin::getObjectData("YouPHPFlix2");
@@ -21,6 +21,14 @@ $uid = uniqid();
 ?>
 <div class="categoriesContainerItem" id="<?php echo $uid; ?>">
 <?php
+$ads2 = getAdsLeaderBoardTop2();
+if (!empty($ads2)) {
+    ?>
+    <div class="row text-center" style="padding: 10px;">
+        <?php echo $ads2; ?>
+    </div>
+    <?php
+}
 TimeLogStart($timeLog);
 if ($obj->Categories) {
     $dataFlickirty = new stdClass();
@@ -42,14 +50,14 @@ if ($obj->Categories) {
         unset($_POST['searchPhrase']);
     }
     unset($_POST['sort']);
-    $_POST['rowCount'] = 2;
+    $_REQUEST['rowCount'] = 2;    
     $categories = Category::getAllCategories(false, true);
     if(empty($categories)){
         echo "</div>";
         return false;
     }
-    $_POST['current']=1;
-    $_POST['rowCount'] = $obj->maxVideos;
+    $_REQUEST['current']=1;
+    $_REQUEST['rowCount'] = $obj->maxVideos;
     $_POST['searchPhrase'] = $searchPhrase;
     $showAllVideos = false;
     if (!empty($_GET['catName'])) {
@@ -94,7 +102,7 @@ if ($obj->Categories) {
             if ($showAllVideos) {
                 TimeLogStart("modeFlixCategory.php showAllVideos");
                 while (1) {
-                    $_POST['current'] ++;
+                    $_REQUEST['current'] ++;
                     $videos = Video::getAllVideos("viewableNotUnlisted", false, true);
                     if (empty($videos)) {
                         break;
@@ -115,5 +123,5 @@ TimeLogEnd($timeLog, __LINE__);
 ?>
 </div>
 <p class="pagination">
-    <a class="pagination__next" href="<?php echo $global['webSiteRootURL']; ?>plugin/YouPHPFlix2/view/modeFlixCategory.php?current=<?php echo count($categories)?$_POST['current'] + 1:$_POST['current']; ?>&rrating=<?php echo @$_GET['rrating']; ?>"></a>
+    <a class="pagination__next" href="<?php echo $global['webSiteRootURL']; ?>plugin/YouPHPFlix2/view/modeFlixCategory.php?current=<?php echo count($categories)?$_REQUEST['current'] + 1:$_REQUEST['current']; ?>&rrating=<?php echo @$_GET['rrating']; ?>"></a>
 </p>

@@ -16,7 +16,7 @@ class BootGrid {
         
         
         if(!empty($FIND_IN_SET)){
-            $sql .= " ORDER BY FIND_IN_SET({$FIND_IN_SET}) ";
+            $sql .= " ORDER BY FIND_IN_SET({$FIND_IN_SET}) DESC ";
         }else if (!empty($_POST['sort'])) {
             $orderBy = array();
             foreach ($_POST['sort'] as $key => $value) {
@@ -35,31 +35,12 @@ class BootGrid {
             $sql .= $alternativeOrderBy;
         }
 
-        if (empty($_POST['rowCount']) && !empty($_GET['length'])) {
-            $_POST['rowCount'] = intval($_GET['length']);
-        }
-
-        if (empty($_POST['current']) && !empty($_GET['start'])) {
-            $_POST['current'] = ($_GET['start'] / $_GET['length']) + 1;
-        } else if (empty($_POST['current']) && isset($_GET['start'])) {
-            $_POST['current'] = 1;
-        }
-
-        $_POST['current'] = intval(@$_POST['current']);
-        $_POST['rowCount'] = intval(@$_POST['rowCount']);
+        $rowCount = getRowCount();
+        $current = getCurrentPage();      
+        $currentP = ($current-1)*$rowCount;
         
-        if(!empty($_POST['rowCount']) && $_POST['rowCount']>0){
-            if(empty($_POST['current'])){
-                $_POST['current'] = 1;
-            }
-            $_POST['rowCount'] = intval($_POST['rowCount']);
-            $_POST['current'] = intval($_POST['current']);
-            $current = intval(($_POST['current']-1)*$_POST['rowCount']);
-            $current = $current<0?0:$current;
-            $sql .= " LIMIT $current, {$_POST['rowCount']} ";
-        }else{
-            $_POST['current'] = 0;
-            $_POST['rowCount'] = 0;
+        if($rowCount>0){
+            $sql .= " LIMIT $currentP, {$rowCount} ";
         }
         return $sql;
     }

@@ -21,8 +21,8 @@
             </div>
             <hr>
             <ul class="nav nav-tabs">
-                <li class="active"><a data-toggle="tab" href="#usersTab">Users</a></li>
-                <li><a data-toggle="tab" href="#inactiveUsersTab">Inactive Users</a></li>
+                <li class="active"><a data-toggle="tab" href="#usersTab"><?php echo __('Users'); ?></a></li>
+                <li><a data-toggle="tab" href="#inactiveUsersTab"><?php echo __('Inactive Users'); ?></a></li>
             </ul>
             <div class="tab-content">
                 <div id="usersTab" class="tab-pane fade in active">
@@ -72,8 +72,9 @@
                         <input type="hidden" id="inputUserId"  >
                         <label for="inputUser" class="sr-only"><?php echo __("User"); ?></label>
                         <input type="text" id="inputUser" class="form-control first" placeholder="<?php echo __("User"); ?>" autofocus required="required">
-                        <label for="inputPassword" class="sr-only"><?php echo __("Password"); ?></label>
-                        <input type="password" id="inputPassword" class="form-control" placeholder="<?php echo __("Password"); ?>" required="required"  autocomplete="off">
+                        <?php
+                        getInputPassword("inputPassword", 'class="form-control" required="required"  autocomplete="off"', __("Password"));
+                        ?>
                         <label for="inputEmail" class="sr-only"><?php echo __("E-mail"); ?></label>
                         <input type="email" id="inputEmail" class="form-control" placeholder="<?php echo __("E-mail"); ?>" >
                         <label for="inputName" class="sr-only"><?php echo __("Name"); ?></label>
@@ -110,6 +111,13 @@
                                 <div class="material-switch pull-right">
                                     <input type="checkbox" value="canViewChart" id="canViewChart"/>
                                     <label for="canViewChart" class="label-success"></label>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <?php echo __("Can create meet"); ?>
+                                <div class="material-switch pull-right">
+                                    <input type="checkbox" value="canCreateMeet" id="canCreateMeet"/>
+                                    <label for="canCreateMeet" class="label-success"></label>
                                 </div>
                             </li>
                             <li class="list-group-item">
@@ -274,8 +282,8 @@
             url: "<?php echo $global['webSiteRootURL']; ?>objects/users.json.php?status=a",
             formatters: {
                 "commands": function (column, row) {
-                    var editBtn = '<button type="button" class="btn btn-xs btn-default command-edit" data-row-id="' + row.id + '" data-toggle="tooltip" data-placement="left" title="Edit"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button>'
-                    var infoBtn = '<button type="button" class="btn btn-xs btn-default command-info" data-row-id="' + row.id + '" data-toggle="tooltip" data-placement="left" title="Info"><i class="fas fa-info-circle"></i></button>'
+                    var editBtn = '<button type="button" class="btn btn-xs btn-default command-edit" data-row-id="' + row.id + '" data-toggle="tooltip" data-placement="left" title="<?php echo __('Edit'); ?>"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button>'
+                    var infoBtn = '<button type="button" class="btn btn-xs btn-default command-info" data-row-id="' + row.id + '" data-toggle="tooltip" data-placement="left" title="<?php echo __('Info'); ?>"><i class="fas fa-info-circle"></i></button>'
                     //var deleteBtn = '<button type="button" class="btn btn-default btn-xs command-delete"  data-row-id="' + row.id + '  data-toggle="tooltip" data-placement="left" title="Delete""><span class="glyphicon glyphicon-erase" aria-hidden="true"></span></button>';
                     var pluginsButtons = '<br><?php echo AVideoPlugin::getUsersManagerListButton(); ?>';
                     return editBtn + infoBtn + pluginsButtons;
@@ -322,6 +330,7 @@
                 $('#canStream').prop('checked', (row.canStream == "1" ? true : false));
                 $('#canUpload').prop('checked', (row.canUpload == "1" ? true : false));
                 $('#canViewChart').prop('checked', (row.canViewChart == "1" ? true : false));
+                $('#canCreateMeet').prop('checked', (row.canCreateMeet == "1" ? true : false));
                 $('#status').prop('checked', (row.status === "a" ? true : false));
                 $('#isEmailVerified').prop('checked', (row.isEmailVerified == "1" ? true : false));
 <?php
@@ -411,6 +420,7 @@ print AVideoPlugin::loadUsersFormJS();
                 $('#canStream').prop('checked', (row.canStream == "1" ? true : false));
                 $('#canUpload').prop('checked', (row.canUpload == "1" ? true : false));
                 $('#canViewChart').prop('checked', (row.canViewChart == "1" ? true : false));
+                $('#canCreateMeet').prop('checked', (row.canCreateMeet == "1" ? true : false));
                 $('#status').prop('checked', (row.status === "a" ? true : false));
                 $('#isEmailVerified').prop('checked', (row.isEmailVerified == "1" ? true : false));
 <?php
@@ -451,6 +461,7 @@ print AVideoPlugin::loadUsersFormJS();
             $('#canStream').prop('checked', false);
             $('#canUpload').prop('checked', false);
             $('#canViewChart').prop('checked', false);
+            $('#canCreateMeet').prop('checked', false);
             $('.userGroups').prop('checked', false);
             $('#status').prop('checked', true);
             $('#isEmailVerified').prop('checked', false);
@@ -467,7 +478,7 @@ print AVideoPlugin::addUserBtnJS();
         $('#updateUserForm').submit(function (evt) {
         evt.preventDefault();
                 if (!isAnalytics()){
-        swal("<?php echo __("Sorry!"); ?>", "<?php echo __("Your analytics code is wrong"); ?>", "error");
+        avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo __("Your analytics code is wrong"); ?>", "error");
                 $('#inputAnalyticsCode').focus();
                 return false;
         }
@@ -494,9 +505,11 @@ print AVideoPlugin::updateUserFormJS();
                                 "canStream": $('#canStream').is(':checked'),
                                 "canUpload": $('#canUpload').is(':checked'),
                                 "canViewChart": $('#canViewChart').is(':checked'),
+                                "canCreateMeet": $('#canCreateMeet').is(':checked'),
                                 "status": $('#status').is(':checked') ? 'a' : 'i',
                                 "isEmailVerified": $('#isEmailVerified').is(':checked'),
-                                "userGroups": selectedUserGroups
+                                "userGroups": selectedUserGroups,
+                                "do_not_login": 1
                         },
                         type: 'post',
                         success: function (response) {
@@ -504,11 +517,11 @@ print AVideoPlugin::updateUserFormJS();
                         $('#userFormModal').modal('hide');
                                 $("#grid").bootgrid("reload");
                                 $("#gridInactive").bootgrid("reload");
-                                swal("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your user has been saved!"); ?>", "success");
+                                avideoAlert("<?php echo __("Congratulations!"); ?>", "<?php echo __("Your user has been saved!"); ?>", "success");
                         } else if (response.error){
-                        swal("<?php echo __("Sorry!"); ?>", response.error, "error");
+                        avideoAlert("<?php echo __("Sorry!"); ?>", response.error, "error");
                         } else {
-                        swal("<?php echo __("Sorry!"); ?>", "<?php echo __("Your user has NOT been updated!"); ?>", "error");
+                        avideoAlert("<?php echo __("Sorry!"); ?>", "<?php echo __("Your user has NOT been updated!"); ?>", "error");
                         }
                         modal.hidePleaseWait();
                         }
